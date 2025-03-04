@@ -37,10 +37,15 @@ const closePage = () => {
         <div class="w-full max-w-[900px] bg-white p-8 shadow-lg rounded-lg mt-4 flex flex-col items-center">
             <div v-if="!showForm" class="w-full max-w-[600px]">
                 <TermsAgreement v-model:agreed="agreed" />
-                <button @click="handleNext" :disabled="!agreed" class="w-full p-3 mt-6 rounded transition"
-                    :class="agreed ? 'bg-blue-500 hover:bg-blue-600 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'">
-                    NEXT
-                </button>
+
+                <!-- NEXT 버튼을 둥글고 짧게 조정 -->
+                <div class="flex justify-center mt-6">
+                    <button @click="handleNext" :disabled="!agreed" class="w-32 py-3 text-white font-semibold rounded-full transition
+                        disabled:bg-gray-300 disabled:text-gray-500 
+                        enabled:bg-blue-500 enabled:hover:bg-blue-600">
+                        NEXT
+                    </button>
+                </div>
             </div>
 
             <!-- 입력 폼을 올바른 크기로 정렬 -->

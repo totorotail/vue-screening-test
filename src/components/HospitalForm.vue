@@ -62,10 +62,12 @@ const handleSubmit = () => {
 
             <p v-if="errorMessage" class="text-red-500 text-sm">{{ errorMessage }}</p>
 
-            <button @click="handleSubmit"
-                class="w-full bg-blue-500 hover:bg-blue-600 text-white p-3 mt-4 rounded transition">
-                가입완료
-            </button>
+            <div class="flex justify-center mt-6">
+                <button @click="handleSubmit" class="w-32 py-3 text-white font-semibold rounded-full transition
+                    bg-blue-500 hover:bg-blue-600">
+                    가입완료
+                </button>
+            </div>
         </div>
     </div>
 </template>
