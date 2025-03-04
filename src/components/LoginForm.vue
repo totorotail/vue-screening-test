@@ -20,17 +20,23 @@ const handleLogin = () => {
 </script>
 
 <template>
-    <div class="w-96">
-        <label class="block mb-1">이메일</label>
-        <input v-model="email" type="email" placeholder="Example@example.com" class="w-full p-2 border rounded" />
+    <div class="mt-6">
+        <label class="block text-gray-700 font-medium">이메일</label>
+        <input v-model="email" type="email" placeholder="Example@example.com" class="w-full p-3 border rounded mt-1" />
 
-        <label class="block mt-4 mb-1">비밀번호</label>
-        <input v-model="password" type="password" placeholder="비밀번호 입력" class="w-full p-2 border rounded" />
+        <label class="block mt-4 text-gray-700 font-medium">비밀번호</label>
+        <input v-model="password" type="password" placeholder="비밀번호 입력" class="w-full p-3 border rounded mt-1" />
 
         <p v-if="errorMessage" class="text-red-500 text-sm mt-2">{{ errorMessage }}</p>
 
-        <button @click="handleLogin" class="w-full bg-blue-500 text-white p-2 mt-4 rounded">로그인</button>
+        <button @click="handleLogin"
+            class="w-full bg-blue-500 hover:bg-blue-600 text-white p-3 mt-6 rounded transition">
+            로그인
+        </button>
 
-        <button @click="router.push('/signup')" class="w-full bg-gray-200 text-black p-2 mt-2 rounded">Sign Up</button>
+        <button @click="router.push('/signup')"
+            class="w-full bg-gray-300 hover:bg-gray-400 text-black p-3 mt-2 rounded transition">
+            Sign Up
+        </button>
     </div>
 </template>
