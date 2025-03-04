@@ -26,34 +26,46 @@ const handleSubmit = () => {
 </script>
 
 <template>
-    <div class="p-8 bg-white shadow-lg rounded-lg w-[600px]">
+    <div class="p-8 bg-white shadow-lg rounded-lg w-full max-w-[600px] mx-auto">
         <h2 class="text-xl font-bold text-center mb-6">회원가입</h2>
 
-        <label class="block text-gray-700 font-medium">이메일 *</label>
-        <input v-model="email" type="email" class="w-full p-3 border rounded mt-1" />
+        <div class="flex flex-col space-y-4">
+            <div class="flex flex-col">
+                <label class="text-gray-700 font-medium">이메일 *</label>
+                <input v-model="email" type="email" class="w-full p-3 border rounded mt-1" />
+            </div>
 
-        <label class="block mt-4 text-gray-700 font-medium">비밀번호 *</label>
-        <input v-model="password" type="password" class="w-full p-3 border rounded mt-1" />
+            <div class="flex flex-col">
+                <label class="text-gray-700 font-medium">비밀번호 *</label>
+                <input v-model="password" type="password" class="w-full p-3 border rounded mt-1" />
+            </div>
 
-        <label class="block mt-4 text-gray-700 font-medium">비밀번호 확인 *</label>
-        <input v-model="confirmPassword" type="password" class="w-full p-3 border rounded mt-1" />
+            <div class="flex flex-col">
+                <label class="text-gray-700 font-medium">비밀번호 확인 *</label>
+                <input v-model="confirmPassword" type="password" class="w-full p-3 border rounded mt-1" />
+            </div>
 
-        <label class="block mt-4 text-gray-700 font-medium">병원명 *</label>
-        <input v-model="hospitalName" type="text" class="w-full p-3 border rounded mt-1" />
+            <div class="flex flex-col">
+                <label class="text-gray-700 font-medium">병원명 *</label>
+                <input v-model="hospitalName" type="text" class="w-full p-3 border rounded mt-1" />
+            </div>
 
-        <label class="block mt-4 text-gray-700 font-medium">병원위치 *</label>
-        <select v-model="location" class="w-full p-3 border rounded mt-1">
-            <option value="">선택</option>
-            <option v-for="loc in hospitalLocations" :key="loc" :value="loc">
-                {{ loc }}
-            </option>
-        </select>
+            <div class="flex flex-col">
+                <label class="text-gray-700 font-medium">병원위치 *</label>
+                <select v-model="location" class="w-full p-3 border rounded mt-1">
+                    <option value="">선택</option>
+                    <option v-for="loc in hospitalLocations" :key="loc" :value="loc">
+                        {{ loc }}
+                    </option>
+                </select>
+            </div>
 
-        <p v-if="errorMessage" class="text-red-500 text-sm mt-2">{{ errorMessage }}</p>
+            <p v-if="errorMessage" class="text-red-500 text-sm">{{ errorMessage }}</p>
 
-        <button @click="handleSubmit"
-            class="w-full bg-blue-500 hover:bg-blue-600 text-white p-3 mt-6 rounded transition">
-            가입완료
-        </button>
+            <button @click="handleSubmit"
+                class="w-full bg-blue-500 hover:bg-blue-600 text-white p-3 mt-4 rounded transition">
+                가입완료
+            </button>
+        </div>
     </div>
 </template>
