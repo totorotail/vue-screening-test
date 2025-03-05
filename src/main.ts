@@ -6,6 +6,9 @@ import router from './router/router.ts';
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { faUserPlus, faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons'
+
+library.add(faUserPlus, faMagnifyingGlass);
 
 createApp(App)
     .component('font-awesome-icon', FontAwesomeIcon)

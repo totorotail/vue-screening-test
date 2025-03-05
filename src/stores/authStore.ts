@@ -2,6 +2,9 @@ import { defineStore } from 'pinia';
 
 interface User {
   email: string;
+  hospitalName: string;
+  location: string;
+  plan: string;
 }
 
 interface AuthState {
@@ -17,7 +20,12 @@ export const useAuthStore = defineStore('auth', {
   actions: {
     login(email: string, password: string): boolean {
       if (email === 'admin@example.com' && password === 'Admin123!') {
-        this.user = { email };
+        this.user = {
+          email,
+          hospitalName: '참조은뇌과병원',
+          location: '경상도',
+          plan: 'BASIC'
+        };
         this.errorMessage = '';
         return true;
       } else {
@@ -25,9 +33,16 @@ export const useAuthStore = defineStore('auth', {
         return false;
       }
     },
+    register(email: string, hospitalName: string, location: string) {
+      this.user = {
+        email,
+        hospitalName,
+        location,
+        plan: 'STARTER' // 신규 가입자는 STARTER 플랜
+      };
+    },
     logout() {
       this.user = null;
     },
   },
 });
-
