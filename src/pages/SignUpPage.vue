@@ -18,8 +18,8 @@ const handleNext = () => {
 };
 
 // 회원가입 후 병원정보보기 페이지로 이동
-const handleSignUpComplete = (userData: { email: string; hospitalName: string; location: string }) => {
-    authStore.register(userData.email, userData.hospitalName, userData.location);
+const handleSignUpComplete = (userData: { email: string; password: string; hospitalName: string; location: string }) => {
+    authStore.register(userData.email, userData.password, userData.hospitalName, userData.location);
     router.push('/hospital-info');
 };
 

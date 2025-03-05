@@ -60,7 +60,8 @@ const closePage = () => {
         <WideLogo class="w-[90%] max-w-[1400px] mt-6 mb-6" :showSearch="true" :userPlan="userInfo.plan"
             userImage="../assets/profile-user.png" />
 
-        <div class="w-[90%] max-w-[1400px] bg-white px-6 py-4 shadow-md rounded-lg mb-4">
+        <div
+            class="w-[90%] max-w-[1400px] flex justify-between items-center bg-white px-6 py-4 shadow-md rounded-lg mb-4">
             <h2 class="text-xl font-semibold text-gray-800">병원정보</h2>
             <button @click="closePage" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
         </div>
@@ -68,12 +69,11 @@ const closePage = () => {
         <div class="w-[90%] max-w-[1400px] flex mt-6 space-x-6">
             <!-- 병원 정보 -->
             <div class="w-1/3 bg-white shadow-lg rounded-lg p-6">
-                <h2 class="text-lg font-bold mb-4">병원정보</h2>
                 <p class="text-gray-600"><strong>이메일:</strong> {{ userInfo.email }}</p>
                 <p class="text-gray-600"><strong>병원이름:</strong> {{ userInfo.hospitalName }}</p>
                 <p class="text-gray-600"><strong>지역:</strong> {{ userInfo.location }}</p>
                 <p class="text-gray-600"><strong>플랜:</strong> {{ userInfo.plan }}</p>
-                <div class="mt-4 flex justify-center">
+                <div class="mt-4 flex">
                     <button @click="openEditModal" class="bg-gray-200 p-2 rounded-full hover:bg-gray-300 transition">
                         ⚙️ 설정
                     </button>
