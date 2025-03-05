@@ -37,7 +37,7 @@ const props = defineProps({
         <!-- ✅ 프로필 이미지 및 플랜 (위치를 더 정확하게 조정) -->
         <div v-if="props.showSearch" class="relative flex items-center">
             <img :src="props.userImage" alt="User Profile" class="w-10 h-10 rounded-full border border-white">
-            <span class="bg-black text-white text-xs px-2 py-1 rounded-full absolute -left-6 -bottom-1">
+            <span class="bg-black text-white text-xs px-2 py-1 rounded-full absolute right-7 -bottom-1">
                 {{ props.userPlan }}
             </span>
         </div>
