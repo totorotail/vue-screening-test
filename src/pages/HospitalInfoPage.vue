@@ -57,8 +57,7 @@ const closePage = () => {
 
 <template>
     <div class="min-h-screen bg-gray-100 flex flex-col items-center relative">
-        <WideLogo class="w-[90%] max-w-[1400px] mt-6 mb-6" :showSearch="true" :userPlan="userInfo.plan"
-            userImage="../assets/profile-user.png" />
+        <WideLogo class="w-[90%] max-w-[1400px] mt-6 mb-6" :showSearch="true" :userPlan="userInfo.plan" />
 
         <div
             class="w-[90%] max-w-[1400px] flex justify-between items-center bg-white px-6 py-4 shadow-md rounded-lg mb-4">

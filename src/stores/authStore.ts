@@ -1,10 +1,13 @@
 import { defineStore } from 'pinia';
 
 interface Patient {
+  id: number;
   name: string;
-  idNumber: string;
+  patientNumber: string;
+  birthDate: string;
+  idNumber: string; // 주민등록번호
   phone: string;
-  patientId: string;
+  lastExam: string | null;
 }
 
 interface User {
@@ -13,7 +16,7 @@ interface User {
   hospitalName: string;
   location: string;
   plan: string;
-  patients: Patient[]; // ✅ 각 유저가 등록한 환자 리스트 추가
+  patients: Patient[]; // ✅ 환자 목록 추가
 }
 
 interface AuthState {
@@ -26,9 +29,7 @@ export const useAuthStore = defineStore('auth', {
     user: null,
     errorMessage: '',
   }),
-
   actions: {
-    // 🔹 로그인 기능
     login(email: string, password: string): boolean {
       if (email === 'admin@example.com' && password === 'Admin123!') {
         this.user = {
@@ -37,7 +38,7 @@ export const useAuthStore = defineStore('auth', {
           hospitalName: '참조은뇌과병원',
           location: '경상도',
           plan: 'BASIC',
-          patients: [] // ✅ 로그인 시 환자 리스트 초기화
+          patients: [] // ✅ 초기 환자 리스트 빈 배열
         };
         this.errorMessage = '';
         return true;
@@ -47,7 +48,6 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    // 🔹 회원가입 기능
     register(email: string, password: string, hospitalName: string, location: string) {
       this.user = {
         email,
@@ -55,25 +55,22 @@ export const useAuthStore = defineStore('auth', {
         hospitalName,
         location,
         plan: 'STARTER',
-        patients: [] // ✅ 회원가입 시 환자 리스트 추가
+        patients: [] // ✅ 신규 가입자도 빈 환자 리스트 포함
       };
     },
 
-    // 🔹 환자 등록 기능 (현재 로그인한 유저의 환자 리스트에 추가)
-    registerPatient(patient: Patient) {
+    // ✅ 환자번호 중복 검사 함수 추가
+    isPatientIdDuplicate(patientNumber: string): boolean {
+      if (!this.user) return false;
+      return this.user.patients.some(patient => patient.patientNumber === patientNumber);
+    },
+
+    // ✅ 환자 등록 함수 추가
+    registerPatient(patientData: Omit<Patient, 'id'>) {
       if (this.user) {
-        this.user.patients.push(patient);
+        const newId = this.user.patients.length + 1; // ✅ 자동 증가 ID
+        this.user.patients.push({ id: newId, ...patientData });
       }
-    },
-
-    // 🔹 환자번호 중복 확인 (회원별 환자 리스트에서 검사)
-    isPatientIdDuplicate(patientId: string): boolean {
-      return this.user?.patients.some(patient => patient.patientId === patientId) ?? false;
-    },
-
-    // 🔹 로그아웃 기능
-    logout() {
-      this.user = null;
     },
   },
 });

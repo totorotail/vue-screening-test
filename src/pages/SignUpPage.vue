@@ -17,10 +17,10 @@ const handleNext = () => {
     }
 };
 
-// 회원가입 후 병원정보보기 페이지로 이동
+// 회원가입 후 환자리스트 페이지로 이동
 const handleSignUpComplete = (userData: { email: string; password: string; hospitalName: string; location: string }) => {
     authStore.register(userData.email, userData.password, userData.hospitalName, userData.location);
-    router.push('/hospital-info');
+    router.push('/patient-list');
 };
 
 // 회원가입(병원가입) 페이지 닫기 기능
