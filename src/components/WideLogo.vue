@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { defineProps } from 'vue';
+import { useRouter } from 'vue-router';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faMagnifyingGlass, faUserPlus } from '@fortawesome/free-solid-svg-icons';
+
+const router = useRouter();
 
 // Props 정의
 const props = defineProps({
@@ -9,6 +12,11 @@ const props = defineProps({
     userPlan: String, // 현재 사용 중인 플랜
     userImage: String // 유저 프로필 이미지
 });
+
+// ✅ 환자등록 페이지로 이동하는 함수
+const goToPatientRegistration = () => {
+    router.push('/patient-registration');
+};
 </script>
 
 <template>
@@ -27,8 +35,9 @@ const props = defineProps({
                     <FontAwesomeIcon :icon="faMagnifyingGlass" class="absolute right-3 text-gray-500" />
                 </div>
 
-                <!-- 환자등록 버튼 -->
-                <button class="bg-white text-blue-500 px-4 py-2 rounded-full font-semibold shadow flex items-center">
+                <!-- ✅ 환자등록 버튼 (클릭 시 이동) -->
+                <button @click="goToPatientRegistration"
+                    class="bg-white text-blue-500 px-4 py-2 rounded-full font-semibold shadow flex items-center">
                     <FontAwesomeIcon :icon="faUserPlus" class="mr-2" /> 환자등록
                 </button>
             </div>
