@@ -1,11 +1,19 @@
 import { defineStore } from 'pinia';
 
+interface Patient {
+  name: string;
+  idNumber: string;
+  phone: string;
+  patientId: string;
+}
+
 interface User {
   email: string;
-  password: string;  // 🔹 비밀번호 필드 추가
+  password: string;
   hospitalName: string;
   location: string;
   plan: string;
+  patients: Patient[]; // ✅ 각 유저가 등록한 환자 리스트 추가
 }
 
 interface AuthState {
@@ -18,16 +26,18 @@ export const useAuthStore = defineStore('auth', {
     user: null,
     errorMessage: '',
   }),
+
   actions: {
-    // 🔹 로그인 (비밀번호 저장)
+    // 🔹 로그인 기능
     login(email: string, password: string): boolean {
       if (email === 'admin@example.com' && password === 'Admin123!') {
         this.user = {
           email,
-          password,  // 🔹 비밀번호 저장 (개발용)
+          password,
           hospitalName: '참조은뇌과병원',
           location: '경상도',
-          plan: 'BASIC'
+          plan: 'BASIC',
+          patients: [] // ✅ 로그인 시 환자 리스트 초기화
         };
         this.errorMessage = '';
         return true;
@@ -37,23 +47,31 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    // 🔹 회원가입 (비밀번호 저장)
+    // 🔹 회원가입 기능
     register(email: string, password: string, hospitalName: string, location: string) {
       this.user = {
         email,
-        password,  // 🔹 비밀번호 저장 (개발용)
+        password,
         hospitalName,
         location,
-        plan: 'STARTER' // 신규 가입자는 STARTER 플랜
+        plan: 'STARTER',
+        patients: [] // ✅ 회원가입 시 환자 리스트 추가
       };
     },
 
-    // 🔹 비밀번호 검증 함수 (비밀번호 확인 시 사용)
-    verifyPassword(inputPassword: string): boolean {
-      return this.user?.password === inputPassword;
+    // 🔹 환자 등록 기능 (현재 로그인한 유저의 환자 리스트에 추가)
+    registerPatient(patient: Patient) {
+      if (this.user) {
+        this.user.patients.push(patient);
+      }
     },
 
-    // 🔹 로그아웃 (비밀번호도 삭제)
+    // 🔹 환자번호 중복 확인 (회원별 환자 리스트에서 검사)
+    isPatientIdDuplicate(patientId: string): boolean {
+      return this.user?.patients.some(patient => patient.patientId === patientId) ?? false;
+    },
+
+    // 🔹 로그아웃 기능
     logout() {
       this.user = null;
     },
