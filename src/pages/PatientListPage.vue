@@ -21,13 +21,14 @@ const goToPatientRegistration = () => {
 };
 
 const closePage = () => {
-    router.push('/'); // 로그인 페이지로 이동
+  router.push('/'); // 로그인 페이지로 이동
 };
 </script>
 
 <template>
   <div class="flex flex-col items-center min-h-screen bg-gray-50 w-full">
-    <WideLogo class="w-[90%] max-w-[1400px] mt-6 mb-6" />
+    <!-- ✅ WideLogo에서 현재 로그인한 사용자의 플랜을 전달 -->
+    <WideLogo class="w-[90%] max-w-[1400px] mt-6 mb-6" :showSearch="true" :userPlan="authStore.user?.plan || ''" />
 
     <div class="w-[90%] max-w-[1400px] flex justify-between items-center bg-white px-6 py-4 shadow-md rounded-lg mb-4">
         <h2 class="text-xl font-semibold text-gray-800">환자리스트</h2>

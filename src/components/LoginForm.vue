@@ -14,7 +14,7 @@ const handleLogin = () => {
     if (!authStore.login(email.value, password.value)) {
         errorMessage.value = authStore.errorMessage;
     } else {
-        router.push('/hospital-info'); // 로그인 성공 후 병원정보보기 페이지로 이동
+        router.push('/patient-list'); // 로그인 성공 후 환자리스트 페이지로 이동
     }
 };
 </script>
