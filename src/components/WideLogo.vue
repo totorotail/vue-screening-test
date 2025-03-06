@@ -1,26 +1,45 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router';
-import { defineProps } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { ref, watch, defineProps, nextTick } from 'vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faMagnifyingGlass, faUserPlus } from '@fortawesome/free-solid-svg-icons';
 
 const router = useRouter();
+const route = useRoute();
 
-// Props 정의
+// ✅ Props 정의 (showSearch, userPlan)
 const props = defineProps({
     showSearch: Boolean, // 검색창 및 버튼 표시 여부
     userPlan: String // 현재 사용 중인 플랜
 });
 
-// ✅ 환자등록 페이지로 이동하는 함수
-const goToPatientRegistration = () => {
-    router.push('/patient-registration');
+// ✅ 검색어 상태 변수
+const searchQuery = ref(route.query.search || '');
+
+// ✅ 검색 실행 함수 (환자리스트 페이지로 이동)
+const searchPatients = async () => {
+    const query = String(searchQuery.value || '').trim(); // ✅ 문자열 변환 후 trim() 적용
+
+    await router.push({ path: '/patient-list', query: query ? { search: query } : {} });
+
+    // ✅ Vue의 반응형 시스템이 변경 사항을 즉시 감지하도록 `nextTick()` 사용
+    await nextTick();
 };
 
 // ✅ 병원정보 페이지로 이동하는 함수
 const goToHospitalInfo = () => {
     router.push('/hospital-info');
 };
+
+// ✅ 환자등록 페이지로 이동하는 함수
+const goToPatientRegistration = () => {
+    router.push('/patient-registration');
+};
+
+// ✅ URL Query 변경 감지하여 `searchQuery` 업데이트
+watch(() => route.query.search, (newSearch) => {
+    searchQuery.value = newSearch || '';
+});
 </script>
 
 <template>
@@ -34,9 +53,11 @@ const goToHospitalInfo = () => {
             <div v-if="props.showSearch" class="flex items-center space-x-3 ml-6">
                 <!-- 검색창 -->
                 <div class="relative flex items-center w-64">
-                    <input type="text" placeholder="환자명 검색"
-                        class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-white">
-                    <FontAwesomeIcon :icon="faMagnifyingGlass" class="absolute right-3 text-gray-500" />
+                    <input v-model="searchQuery" type="text" placeholder="환자명 검색"
+                        class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-white"
+                        @keyup.enter="searchPatients">
+                    <FontAwesomeIcon :icon="faMagnifyingGlass" class="absolute right-3 text-gray-500 cursor-pointer"
+                        @click="searchPatients" />
                 </div>
 
                 <!-- ✅ 환자등록 버튼 -->
