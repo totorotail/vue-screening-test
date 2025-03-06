@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/authStore';
 import WideLogo from '../components/WideLogo.vue';
@@ -8,11 +8,27 @@ const router = useRouter();
 const authStore = useAuthStore();
 
 const patients = computed(() => authStore.user?.patients || []);
+const itemsPerPage = 10; // ✅ 한 페이지에 표시할 환자 수
+const currentPage = ref(1); // ✅ 현재 페이지
+const totalPages = computed(() => Math.ceil(patients.value.length / itemsPerPage)); // ✅ 전체 페이지 수
+
+// ✅ 현재 페이지에 해당하는 환자 리스트
+const paginatedPatients = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  return patients.value.slice(start, start + itemsPerPage);
+});
 
 // ✅ 주민등록번호로 성별 판별 (1,3 → 남자 / 2,4 → 여자)
 const getGender = (idNumber: string) => {
   const genderDigit = idNumber.charAt(7);
   return genderDigit === '1' || genderDigit === '3' ? '남자' : '여자';
+};
+
+// ✅ 페이지네이션 이동
+const goToPage = (page: number) => {
+  if (page > 0 && page <= totalPages.value) {
+    currentPage.value = page;
+  }
 };
 
 // ✅ 환자 등록 페이지로 이동
@@ -60,8 +76,8 @@ const closePage = () => {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="patient in patients" :key="patient.id" class="border-b border-gray-200">
-            <td class="p-3">{{ patient.id }}</td>
+          <tr v-for="(patient, index) in paginatedPatients" :key="patient.patientNumber" class="border-b border-gray-200">
+            <td class="p-3">{{ (currentPage - 1) * itemsPerPage + index + 1 }}</td>
             <td class="p-3">{{ patient.name }}</td>
             <td class="p-3">{{ patient.patientNumber }}</td>
             <td class="p-3">{{ patient.birthDate }}</td>
@@ -71,6 +87,25 @@ const closePage = () => {
           </tr>
         </tbody>
       </table>
+
+      <!-- ✅ 페이지네이션 -->
+      <div class="flex justify-center mt-6 space-x-2">
+        <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1"
+          class="px-3 py-2 border rounded disabled:opacity-50">
+          &lt;
+        </button>
+
+        <button v-for="page in totalPages" :key="page" @click="goToPage(page)"
+          class="px-4 py-2 border rounded"
+          :class="{'bg-blue-500 text-white': page === currentPage, 'hover:bg-gray-200': page !== currentPage}">
+          {{ page }}
+        </button>
+
+        <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages"
+          class="px-3 py-2 border rounded disabled:opacity-50">
+          &gt;
+        </button>
+      </div>
     </div>
   </div>
 </template>
