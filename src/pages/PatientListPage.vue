@@ -17,6 +17,7 @@ const searchQuery = ref<string>(String(route.query.search || ''));
 // ✅ 검색 실행 함수 (돋보기 버튼 클릭 시 실행됨)
 const searchPatients = async () => {
   const query = searchQuery.value.trim();
+  currentPage.value = 1; // ✅ 검색 후 첫 페이지로 이동
   await router.replace({ path: '/patient-list', query: query ? { search: query } : {} });
   await nextTick(); // Vue 업데이트 반영을 강제 실행
 };
@@ -45,7 +46,7 @@ const getGender = (idNumber: string) => {
   return genderDigit === '1' || genderDigit === '3' ? '남자' : '여자';
 };
 
-// ✅ 페이지네이션 이동
+// ✅ 페이지네이션 이동 (버튼 클릭 시 실행됨)
 const goToPage = (page: number) => {
   if (page > 0 && page <= totalPages.value) {
     currentPage.value = page;
@@ -131,6 +132,25 @@ watch(() => route.query.search, (newQuery) => {
           </tr>
         </tbody>
       </table>
+
+      <!-- ✅ 페이지네이션 -->
+      <div class="flex justify-center mt-6 space-x-2">
+        <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1"
+          class="px-3 py-2 border rounded disabled:opacity-50">
+          &lt;
+        </button>
+
+        <button v-for="page in totalPages" :key="page" @click="goToPage(page)"
+          class="px-4 py-2 border rounded"
+          :class="{'bg-blue-500 text-white': page === currentPage, 'hover:bg-gray-200': page !== currentPage}">
+          {{ page }}
+        </button>
+
+        <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages"
+          class="px-3 py-2 border rounded disabled:opacity-50">
+          &gt;
+        </button>
+      </div>
     </div>
   </div>
 </template>
