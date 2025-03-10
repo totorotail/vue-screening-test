@@ -72,13 +72,8 @@ watch(() => route.query.search, (newQuery) => {
 <template>
   <div class="flex flex-col items-center min-h-screen bg-gray-50 w-full">
     <!-- ✅ WideLogo에서 현재 로그인한 사용자의 플랜을 전달 -->
-    <WideLogo
-      class="w-[90%] max-w-[1400px] mt-6 mb-6"
-      :showSearch="true"
-      :userPlan="authStore.user?.plan || ''"
-      v-model:searchQuery="searchQuery"
-      @search="searchPatients"
-    />
+    <WideLogo class="w-[90%] max-w-[1400px] mt-6 mb-6" :showSearch="true" :userPlan="authStore.user?.plan || ''"
+      v-model:searchQuery="searchQuery" @search="searchPatients" />
 
     <div class="w-[90%] max-w-[1400px] flex justify-between items-center bg-white px-6 py-4 shadow-md rounded-lg mb-4">
       <h2 class="text-xl font-semibold text-gray-800">환자리스트</h2>
@@ -86,7 +81,8 @@ watch(() => route.query.search, (newQuery) => {
     </div>
 
     <!-- ✅ 검색 전 환자가 없는 경우 -->
-    <div v-if="patients.length === 0 && !searchQuery" class="w-[90%] max-w-[1400px] bg-white p-8 shadow-lg rounded-lg flex flex-col items-center">
+    <div v-if="patients.length === 0 && !searchQuery"
+      class="w-[90%] max-w-[1400px] bg-white p-8 shadow-lg rounded-lg flex flex-col items-center">
       <p class="text-gray-600 text-lg font-semibold">등록된 환자가 없습니다.<br>환자를 등록해주세요.</p>
       <img src="../assets/no-patient.png" alt="No Patients" class="w-64 mt-4" />
       <button @click="goToPatientRegistration"
@@ -96,7 +92,8 @@ watch(() => route.query.search, (newQuery) => {
     </div>
 
     <!-- ✅ 검색 후 검색 결과가 없는 경우 -->
-    <div v-else-if="filteredPatients.length === 0 && searchQuery" class="w-[90%] max-w-[1400px] bg-white p-8 shadow-lg rounded-lg flex flex-col items-center">
+    <div v-else-if="filteredPatients.length === 0 && searchQuery"
+      class="w-[90%] max-w-[1400px] bg-white p-8 shadow-lg rounded-lg flex flex-col items-center">
       <p class="text-gray-600 text-lg font-semibold">
         '{{ searchQuery }}'이 없습니다.
       </p>
@@ -121,7 +118,9 @@ watch(() => route.query.search, (newQuery) => {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(patient, index) in paginatedPatients" :key="patient.patientNumber">
+          <tr v-for="(patient, index) in paginatedPatients" :key="patient.patientNumber"
+            class="border-b border-gray-200 cursor-pointer hover:bg-gray-100"
+            @click="router.push(`/patient-detail/${patient.patientNumber}`)">
             <td class="p-3">{{ (currentPage - 1) * itemsPerPage + index + 1 }}</td>
             <td class="p-3">{{ patient.name }}</td>
             <td class="p-3">{{ patient.patientNumber }}</td>
@@ -140,9 +139,8 @@ watch(() => route.query.search, (newQuery) => {
           &lt;
         </button>
 
-        <button v-for="page in totalPages" :key="page" @click="goToPage(page)"
-          class="px-4 py-2 border rounded"
-          :class="{'bg-blue-500 text-white': page === currentPage, 'hover:bg-gray-200': page !== currentPage}">
+        <button v-for="page in totalPages" :key="page" @click="goToPage(page)" class="px-4 py-2 border rounded"
+          :class="{ 'bg-blue-500 text-white': page === currentPage, 'hover:bg-gray-200': page !== currentPage }">
           {{ page }}
         </button>
 
