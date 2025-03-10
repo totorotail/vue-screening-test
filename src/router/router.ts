@@ -4,6 +4,7 @@ import SignUpPage from '../pages/SignUpPage.vue';
 import HospitalInfoPage from '../pages/HospitalInfoPage.vue';
 import PatientRegistrationPage from '../pages/PatientRegistrationPage.vue';
 import PatientListPage from '../pages/PatientListPage.vue';
+import PatientDetailPage from '../pages/PatientDetailPage.vue';
 
 const routes = [
     { path: '/', name: 'Login', component: LoginPage },
@@ -11,6 +12,7 @@ const routes = [
     { path: '/hospital-info', name: 'HospitalInfo', component: HospitalInfoPage },
     { path: '/patient-registration', name: 'PatientRegistration', component: PatientRegistrationPage },
     { path: '/patient-list', name: 'PatientList', component: PatientListPage },
+    { path: '/patient-detail/:patientId', name: 'PatientDetail', component: PatientDetailPage },
 ];
 
 const router = createRouter({
