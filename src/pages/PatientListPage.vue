@@ -46,6 +46,11 @@ const getGender = (idNumber: string) => {
   return genderDigit === '1' || genderDigit === '3' ? '남자' : '여자';
 };
 
+// ✅ 환자 상세보기로 이동하는 함수
+const goToPatientDetail = (patientNumber: string) => {
+  router.push(`/patient-detail/${patientNumber}`);
+};
+
 // ✅ 페이지네이션 이동 (버튼 클릭 시 실행됨)
 const goToPage = (page: number) => {
   if (page > 0 && page <= totalPages.value) {
@@ -120,14 +125,13 @@ watch(() => route.query.search, (newQuery) => {
         <tbody>
           <tr v-for="(patient, index) in paginatedPatients" :key="patient.patientNumber"
             class="border-b border-gray-200 cursor-pointer hover:bg-gray-100"
-            @click="router.push(`/patient-detail/${patient.patientNumber}`)">
+            @click="goToPatientDetail(patient.patientNumber)">
             <td class="p-3">{{ (currentPage - 1) * itemsPerPage + index + 1 }}</td>
             <td class="p-3">{{ patient.name }}</td>
             <td class="p-3">{{ patient.patientNumber }}</td>
             <td class="p-3">{{ patient.birthDate }}</td>
             <td class="p-3">{{ getGender(patient.idNumber) }}</td>
             <td class="p-3">{{ patient.phone }}</td>
-            <td class="p-3">{{ patient.lastExam || 'null' }}</td>
           </tr>
         </tbody>
       </table>
