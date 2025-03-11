@@ -12,7 +12,7 @@ const routes = [
     { path: '/hospital-info', name: 'HospitalInfo', component: HospitalInfoPage },
     { path: '/patient-registration', name: 'PatientRegistration', component: PatientRegistrationPage },
     { path: '/patient-list', name: 'PatientList', component: PatientListPage },
-    { path: '/patient-detail/:patientId', name: 'PatientDetail', component: PatientDetailPage },
+    { path: '/patient-detail/:id', name: 'PatientDetail', component: PatientDetailPage },
 ];
 
 const router = createRouter({
