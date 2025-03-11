@@ -46,6 +46,16 @@ const getGender = (idNumber: string) => {
   return genderDigit === '1' || genderDigit === '3' ? '남자' : '여자';
 };
 
+// ✅ 최근 검사일을 "XX일 전"으로 변환하는 함수
+const getDaysAgo = (examDate: string | null) => {
+  if (!examDate) return "없음";
+  const examTime = new Date(examDate).getTime();
+  const todayTime = new Date().getTime();
+  const diffTime = todayTime - examTime;
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)); // ✅ 밀리초 → 일 단위 변환
+  return diffDays > 0 ? `${diffDays}일전` : "오늘";
+};
+
 // ✅ 환자 상세보기로 이동하는 함수
 const goToPatientDetail = (patientNumber: string) => {
   router.push(`/patient-detail/${patientNumber}`);
@@ -132,6 +142,7 @@ watch(() => route.query.search, (newQuery) => {
             <td class="p-3">{{ patient.birthDate }}</td>
             <td class="p-3">{{ getGender(patient.idNumber) }}</td>
             <td class="p-3">{{ patient.phone }}</td>
+            <td class="p-3">{{ getDaysAgo(patient.lastExam) }}</td> <!-- ✅ 최신 검사 날짜 변환 적용 -->
           </tr>
         </tbody>
       </table>
