@@ -136,9 +136,9 @@ const chartOptions = {
 
     <!-- ✅ 환자정보 수정 모달 -->
     <EditPatientInfoModal 
-        :patient="patient" 
-        :showModal="showModal" 
-        @close="showModal = false" 
-        @updatePatient="updatePatientInfo"
-    />
+            v-if="showModal"
+            :patient="patient" 
+            @close="showModal = false" 
+            @updatePatient="updatePatientInfo"
+        />
 </template>
