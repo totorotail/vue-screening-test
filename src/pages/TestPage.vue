@@ -15,6 +15,9 @@ const testStore = useTestStore();
 // ✅ 초기 페이지 상태 (검사 시작 전 화면 표시 여부)
 const showIntroPage = ref(true);
 
+// ✅ 검사 완료 화면 상태 추가
+const showCompletionPage = ref(false);
+
 // ✅ 환자 정보 가져오기
 const patientId = route.query.patientId as string;
 const selectedTests = ref<string[]>((route.query.tests as string || '').split(',').filter(Boolean));
@@ -80,7 +83,7 @@ const goToNextTest = () => {
 
 // ✅ 검사 완료 처리
 const completeTest = () => {
-    router.push({ name: 'PatientDetail', params: { id: patientId } });
+    showCompletionPage.value = true;
 };
 </script>
 
@@ -93,7 +96,7 @@ const completeTest = () => {
         <div class="w-[90%] max-w-[1400px] bg-white px-6 py-4 shadow-md rounded-lg flex justify-between items-center">
             <h2 class="text-lg font-bold">검사하기</h2>
             <button @click="router.push('/patient-list')" class="text-gray-600 hover:text-gray-800 text-xl">
-                ✕
+                <img src="../assets/close-icon.png" alt="닫기" class="w-6 h-6 cursor-pointer">
             </button>
         </div>
 
@@ -104,7 +107,7 @@ const completeTest = () => {
                     <span v-if="index > 0" class="text-gray-400 text-lg">→</span>
                     <span class="flex items-center space-x-2">
                         <span :class="[getTestStyle(test, false).bg, getTestStyle(test, false).color,
-                        'px-3 py-1 rounded-full text-sm font-semibold text-gray-400']">
+                            'px-3 py-1 rounded-full text-sm font-semibold text-gray-400']">
                             {{ test }}
                         </span>
                         <span class="text-gray-400">{{ getTestStyle(test, false).name }}</span>
@@ -114,7 +117,8 @@ const completeTest = () => {
         </div>
 
         <!-- ✅ 초기 화면: 검사 시작 전 -->
-        <div v-if="showIntroPage" class="w-[90%] max-w-[1400px] bg-white px-6 py-12 shadow-md rounded-lg text-center mt-1">
+        <div v-if="showIntroPage"
+            class="w-[90%] max-w-[1400px] bg-white px-6 py-39 shadow-md rounded-lg text-center mt-1">
             <h2 class="text-2xl font-bold mb-4">선별검사를 시작하겠습니다.</h2>
             <p class="text-gray-600 mb-8">아래의 정보가 맞다면 시작을 눌러주세요.</p>
 
@@ -133,10 +137,8 @@ const completeTest = () => {
             </div>
         </div>
 
-        
-
         <!-- ✅ 검사 질문 영역 -->
-        <div v-if="!showIntroPage" class="w-[90%] max-w-[1400px] bg-white px-6 py-6 shadow-md rounded-lg mt-1">
+        <div v-if="!showIntroPage && !showCompletionPage" class="w-[90%] max-w-[1400px] bg-white px-6 py-14 shadow-md rounded-lg mt-1">
             <div v-if="currentTest">
                 <h2 class="text-xl font-bold">{{ testInfo?.description }}</h2>
 
@@ -156,17 +158,32 @@ const completeTest = () => {
 
                 <!-- ✅ NEXT / CONFIRM 버튼 (활성/비활성 스타일 적용) -->
                 <div class="flex justify-end mt-6">
-                    <button v-if="currentTestIndex < selectedTests.length - 1" @click="goToNextTest" :class="['px-6 py-3 rounded-full font-bold transition',
-                        isNextEnabled ? 'bg-blue-500 text-white hover:bg-blue-600' : 'bg-blue-200 text-gray-400 cursor-not-allowed']"
-                        :disabled="!isNextEnabled">
+                    <button v-if="currentTestIndex < selectedTests.length - 1" @click="goToNextTest"
+                        :class="['px-6 py-3 rounded-full font-bold transition',
+                            isNextEnabled ? 'bg-blue-500 text-white hover:bg-blue-600' : 'bg-blue-200 text-gray-400 cursor-not-allowed']" :disabled="!isNextEnabled">
                         NEXT
                     </button>
                     <button v-else @click="completeTest"
                         :class="['px-6 py-3 rounded-full font-bold transition',
-                            isNextEnabled ? 'bg-blue-500 text-white hover:bg-blue-600' : 'bg-blue-200 text-gray-400 cursor-not-allowed']" :disabled="!isNextEnabled">
+                            isNextEnabled ? 'bg-blue-500 text-white hover:bg-blue-600' : 'bg-blue-200 text-gray-400 cursor-not-allowed']"
+                        :disabled="!isNextEnabled">
                         CONFIRM
                     </button>
                 </div>
+            </div>
+        </div>
+
+        <!-- ✅ 검사 완료 화면 -->
+        <div v-if="showCompletionPage"
+            class="w-[90%] max-w-[1400px] bg-white px-6 py-55 shadow-md rounded-lg text-center mt-1">
+            <h2 class="text-2xl font-bold mb-4">{{ patient?.name || '환자' }}님,</h2>
+            <p class="text-xl font-bold mb-8">검사가 완료되었습니다.<br>패드를 데스크로 반납해주세요.</p>
+
+            <div class="mt-6">
+                <button @click="router.push('/patient-list')"
+                    class="w-full max-w-xs px-6 py-3 bg-blue-500 text-white font-semibold rounded-full hover:bg-blue-600 transition">
+                    검사완료
+                </button>
             </div>
         </div>
     </div>
