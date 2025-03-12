@@ -106,11 +106,17 @@ const completeTest = () => {
                 <template v-for="(test, index) in selectedTests" :key="test">
                     <span v-if="index > 0" class="text-gray-400 text-lg">→</span>
                     <span class="flex items-center space-x-2">
-                        <span :class="[getTestStyle(test, false).bg, getTestStyle(test, false).color,
-                            'px-3 py-1 rounded-full text-sm font-semibold text-gray-400']">
+                        <span :class="[getTestStyle(test, !showIntroPage && !showCompletionPage && index === currentTestIndex).bg,
+                        getTestStyle(test, !showIntroPage && !showCompletionPage && index === currentTestIndex).color,
+                            'px-3 py-1 rounded-full text-sm font-semibold',
+                        !showIntroPage && !showCompletionPage && index === currentTestIndex ? 'text-black font-bold' : 'text-gray-400']">
                             {{ test }}
                         </span>
-                        <span class="text-gray-400">{{ getTestStyle(test, false).name }}</span>
+                        <span
+                            :class="!showIntroPage && !showCompletionPage && index === currentTestIndex ? 'text-black font-bold' : 'text-gray-400'">
+                            {{ getTestStyle(test, !showIntroPage && !showCompletionPage && index ===
+                            currentTestIndex).name }}
+                        </span>
                     </span>
                 </template>
             </div>
@@ -138,7 +144,8 @@ const completeTest = () => {
         </div>
 
         <!-- ✅ 검사 질문 영역 -->
-        <div v-if="!showIntroPage && !showCompletionPage" class="w-[90%] max-w-[1400px] bg-white px-6 py-14 shadow-md rounded-lg mt-1">
+        <div v-if="!showIntroPage && !showCompletionPage"
+            class="w-[90%] max-w-[1400px] bg-white px-6 py-14 shadow-md rounded-lg mt-1">
             <div v-if="currentTest">
                 <h2 class="text-xl font-bold">{{ testInfo?.description }}</h2>
 
