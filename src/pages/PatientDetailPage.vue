@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router';
 import { useAuthStore } from '../stores/authStore';
 import { useTestStore } from '../stores/testStore';
 import WideLogo from '../components/WideLogo.vue';
+import EditPatientInfoModal from '../components/EditPatientInfoModal.vue';
 import Chart from 'vue-google-charts';
 
 const route = useRoute();
@@ -35,6 +36,19 @@ const gender = computed(() => {
     return genderDigit === '1' || genderDigit === '3' ? '남자' : '여자';
 });
 
+// ✅ 모달창 상태
+const showModal = ref(false);
+
+// ✅ 환자 정보 업데이트 함수
+const updatePatientInfo = (updatedPatient: any) => {
+    if (!authStore.user) return;
+    const index = authStore.user.patients.findIndex(p => p.patientNumber === patient.value.patientNumber);
+    if (index !== -1) {
+        authStore.user.patients[index] = updatedPatient;
+        patient.value = updatedPatient; // 화면 갱신
+    }
+};
+
 // ✅ Google Charts 옵션
 const chartOptions = {
     title: '',
@@ -60,7 +74,7 @@ const chartOptions = {
             <div class="w-2/5 bg-white p-6 shadow-lg rounded-lg">
                 <div class="flex justify-between items-center">
                     <p class="font-bold text-lg">{{ patient?.name || '없음' }}</p>
-                    <img src="../assets/setting-icon.png" alt="설정" class="w-6 h-6 cursor-pointer">
+                    <img src="../assets/setting-icon.png" alt="설정" class="w-6 h-6 cursor-pointer" @click="showModal = true">
                 </div>
 
                 <!-- ✅ 환자 정보 정리 (가로 정렬) -->
@@ -119,4 +133,12 @@ const chartOptions = {
             <div class="w-2/5"></div>
         </div>
     </div>
+
+    <!-- ✅ 환자정보 수정 모달 -->
+    <EditPatientInfoModal 
+        :patient="patient" 
+        :showModal="showModal" 
+        @close="showModal = false" 
+        @updatePatient="updatePatientInfo"
+    />
 </template>
