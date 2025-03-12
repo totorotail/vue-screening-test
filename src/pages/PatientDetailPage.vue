@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/authStore';
 import { useTestStore } from '../stores/testStore';
 import WideLogo from '../components/WideLogo.vue';
 import EditPatientInfoModal from '../components/EditPatientInfoModal.vue';
+import SelectTestModal from '../components/SelectTestModal.vue';
 import Chart from 'vue-google-charts';
 
 const route = useRoute();
+const router = useRouter();
 const authStore = useAuthStore();
 const testStore = useTestStore();
 
@@ -38,6 +40,17 @@ const gender = computed(() => {
 
 // ✅ 모달창 상태
 const showModal = ref(false);
+const showTestModal = ref(false);
+const selectedTests = ref<string[]>([]);
+
+// ✅ 검사 선택 후 처리
+const handleTestSelection = (tests: string[]) => {
+    selectedTests.value = tests;
+    showTestModal.value = false;
+    if (tests.length > 0) {
+        router.push({ name: 'TestPage', query: { patientId: patient.value.patientNumber, tests: tests.join(',') } });
+    }
+};
 
 // ✅ 환자 정보 업데이트 함수
 const updatePatientInfo = (updatedPatient: any) => {
@@ -74,7 +87,8 @@ const chartOptions = {
             <div class="w-2/5 bg-white p-6 shadow-lg rounded-lg">
                 <div class="flex justify-between items-center">
                     <p class="font-bold text-lg">{{ patient?.name || '없음' }}</p>
-                    <img src="../assets/setting-icon.png" alt="설정" class="w-6 h-6 cursor-pointer" @click="showModal = true">
+                    <img src="../assets/setting-icon.png" alt="설정" class="w-6 h-6 cursor-pointer"
+                        @click="showModal = true">
                 </div>
 
                 <!-- ✅ 환자 정보 정리 (가로 정렬) -->
@@ -123,7 +137,8 @@ const chartOptions = {
             <div class="w-1/5 ml-4 bg-white p-6 shadow-lg rounded-lg">
                 <div class="flex justify-between items-center">
                     <h3 class="text-lg font-bold">검사 기록</h3>
-                    <button class="px-3 py-1 bg-blue-500 text-white text-sm font-semibold rounded-lg">검사하기</button>
+                    <button @click="showTestModal = true"
+                        class="px-3 py-1 bg-blue-500 text-white text-sm font-semibold rounded-lg">검사하기</button>
                 </div>
                 <hr class="my-2">
                 <p class="text-gray-500">검사기록이 없습니다.</p>
@@ -135,10 +150,8 @@ const chartOptions = {
     </div>
 
     <!-- ✅ 환자정보 수정 모달 -->
-    <EditPatientInfoModal 
-            v-if="showModal"
-            :patient="patient" 
-            @close="showModal = false" 
-            @updatePatient="updatePatientInfo"
-        />
+    <EditPatientInfoModal v-if="showModal" :patient="patient" @close="showModal = false"
+        @updatePatient="updatePatientInfo" />
+
+    <SelectTestModal v-if="showTestModal" @close="showTestModal = false" @confirm="handleTestSelection" />
 </template>
