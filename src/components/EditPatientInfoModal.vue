@@ -73,7 +73,7 @@ const savePatientInfo = () => {
         <div class="flex justify-between mt-6">
             <button @click="$emit('close')" class="px-4 py-2 border rounded-lg hover:bg-gray-200 transition">취소</button>
             <button @click="savePatientInfo"
-                class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">저장</button>
+                class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">CONFIRM</button>
         </div>
     </div>
 </template>
