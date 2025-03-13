@@ -5,6 +5,7 @@ import { useAuthStore } from '../stores/authStore';
 import { useTestDetailsStore } from '../stores/testDetailsStore';
 import { useTestStore } from '../stores/testStore';
 import WideLogo from '../components/WideLogo.vue';
+import ExitTestModal from '../components/ExitTestModal.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -17,6 +18,9 @@ const showIntroPage = ref(true);
 
 // ✅ 검사 완료 화면 상태 추가
 const showCompletionPage = ref(false);
+
+// ✅ 모달 상태 변수 추가
+const showExitModal = ref(false);
 
 // ✅ 환자 정보 가져오기
 const patientId = route.query.patientId as string;
@@ -85,6 +89,21 @@ const goToNextTest = () => {
 const completeTest = () => {
     showCompletionPage.value = true;
 };
+
+// ✅ 닫기 버튼 클릭 시 모달 표시
+const openExitModal = () => {
+    showExitModal.value = true;
+};
+
+// ✅ '그만하기' 버튼 클릭 시 환자 상세 페이지로 이동
+const exitToPatientDetail = () => {
+    router.push(`/patient-detail/${patientId}`);
+};
+
+// ✅ '계속하기' 버튼 클릭 시 모달 닫기
+const continueTest = () => {
+    showExitModal.value = false;
+};
 </script>
 
 <template>
@@ -95,7 +114,7 @@ const completeTest = () => {
         <!-- ✅ 타이틀 영역 -->
         <div class="w-[90%] max-w-[1400px] bg-white px-6 py-4 shadow-md rounded-lg flex justify-between items-center">
             <h2 class="text-lg font-bold">검사하기</h2>
-            <button @click="router.push('/patient-list')" class="text-gray-600 hover:text-gray-800 text-xl">
+            <button @click="openExitModal" class="text-gray-600 hover:text-gray-800 text-xl">
                 <img src="../assets/close-icon.png" alt="닫기" class="w-6 h-6 cursor-pointer">
             </button>
         </div>
@@ -106,16 +125,17 @@ const completeTest = () => {
                 <template v-for="(test, index) in selectedTests" :key="test">
                     <span v-if="index > 0" class="text-gray-400 text-lg">→</span>
                     <span class="flex items-center space-x-2">
-                        <span :class="[getTestStyle(test, !showIntroPage && !showCompletionPage && index === currentTestIndex).bg,
-                        getTestStyle(test, !showIntroPage && !showCompletionPage && index === currentTestIndex).color,
-                            'px-3 py-1 rounded-full text-sm font-semibold',
-                        !showIntroPage && !showCompletionPage && index === currentTestIndex ? 'text-black font-bold' : 'text-gray-400']">
+                        <span
+                            :class="[getTestStyle(test, !showIntroPage && !showCompletionPage && index === currentTestIndex).bg,
+                            getTestStyle(test, !showIntroPage && !showCompletionPage && index === currentTestIndex).color,
+                                'px-3 py-1 rounded-full text-sm font-semibold',
+                            !showIntroPage && !showCompletionPage && index === currentTestIndex ? 'text-black font-bold' : 'text-gray-400']">
                             {{ test }}
                         </span>
                         <span
                             :class="!showIntroPage && !showCompletionPage && index === currentTestIndex ? 'text-black font-bold' : 'text-gray-400'">
                             {{ getTestStyle(test, !showIntroPage && !showCompletionPage && index ===
-                            currentTestIndex).name }}
+                                currentTestIndex).name }}
                         </span>
                     </span>
                 </template>
@@ -179,6 +199,9 @@ const completeTest = () => {
                 </div>
             </div>
         </div>
+
+        <!-- ✅ 검사 종료 모달 (ExitTestModal 컴포넌트) -->
+        <ExitTestModal :show="showExitModal" @close="continueTest" @exit="exitToPatientDetail" />
 
         <!-- ✅ 검사 완료 화면 -->
         <div v-if="showCompletionPage"
