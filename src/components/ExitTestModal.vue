@@ -19,7 +19,7 @@ const exitToPatientDetail = () => {
 </script>
 
 <template>
-    <div v-if="props.show" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
+    <div v-if="props.show" class="fixed inset-0 flex items-center justify-center bg-opacity-30 backdrop-blur-sm">
         <div class="bg-white w-96 p-6 rounded-lg shadow-lg text-center">
             <h2 class="text-xl font-bold mb-4">검사가 진행중입니다.</h2>
             <p class="text-gray-600 mb-6">계속 진행하시겠습니까?</p>
