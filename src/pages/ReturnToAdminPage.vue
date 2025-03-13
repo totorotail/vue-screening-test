@@ -12,7 +12,7 @@ const isNextEnabled = computed(() => password.value.length > 0);
 
 // ✅ 비밀번호 검증 후 페이지 이동
 const goToAdminMode = () => {
-    if (password.value === 'admin123') { // 실제 구현에서는 서버 요청 필요
+    if (password.value === 'Admin123!') { // 실제 구현에서는 서버 요청 필요
         router.push('/patient-detail'); // 환자 상세보기 페이지로 이동
     } else {
         alert('비밀번호가 올바르지 않습니다.');

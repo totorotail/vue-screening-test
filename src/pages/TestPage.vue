@@ -187,7 +187,7 @@ const completeTest = () => {
             <p class="text-xl font-bold mb-8">검사가 완료되었습니다.<br>패드를 데스크로 반납해주세요.</p>
 
             <div class="mt-6">
-                <button @click="router.push('/patient-list')"
+                <button @click="router.push('/return-to-admin')"
                     class="w-full max-w-xs px-6 py-3 bg-blue-500 text-white font-semibold rounded-full hover:bg-blue-600 transition">
                     검사완료
                 </button>
