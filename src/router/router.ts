@@ -7,6 +7,7 @@ import PatientRegistrationPage from '../pages/PatientRegistrationPage.vue';
 import PatientListPage from '../pages/PatientListPage.vue';
 import PatientDetailPage from '../pages/PatientDetailPage.vue';
 import TestPage from '../pages/TestPage.vue';
+import ReturnToAdminPage from '../pages/ReturnToAdminPage.vue';
 
 const routes = [
     { path: '/', name: 'Login', component: LoginPage },
@@ -23,6 +24,7 @@ const routes = [
             selectedTests: (route.query.tests as string || '').split(',').filter(Boolean)
         })
     },
+    { path: '/return-to-admin', name: 'ReturnToAdmin', component: ReturnToAdminPage },
 ];
 
 const router = createRouter({
