@@ -71,6 +71,30 @@ const chartOptions = {
     chartArea: { width: '85%', height: '70%' },
     backgroundColor: '#ffffff'
 };
+
+// ✅ ExamResult 타입 직접 정의
+interface ExamResult {
+    totalScore: number;
+    responses: number[];
+}
+
+// ✅ 날짜별 검사 기록을 정리하여 검사 기록 목록에 표시할 데이터 생성
+const formattedExamRecords = computed(() => {
+    if (!patient.value || !patient.value.examRecords) return [];
+
+    return Object.entries(patient.value.examRecords).map(([date, exams]) => {
+        const examEntries = exams as Record<string, ExamResult>; // ✅ 명확한 타입 지정
+        const examTypes = Object.keys(examEntries);
+        const displayedExams = examTypes.slice(0, 4); // 최대 4개까지 표시
+        const moreExams = examTypes.length > 4 ? `+${examTypes.length - 4}` : '';
+
+        return {
+            date,
+            displayedExams,
+            moreExams
+        };
+    }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // 최신 날짜순 정렬
+});
 </script>
 
 <template>
@@ -134,15 +158,34 @@ const chartOptions = {
             </div>
 
             <!-- ✅ 중앙: 검사 기록 -->
-            <div class="w-1/5 ml-4 bg-white p-6 shadow-lg rounded-lg">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-lg font-bold">검사 기록</h3>
-                    <button @click="showTestModal = true"
-                        class="px-3 py-1 bg-blue-500 text-white text-sm font-semibold rounded-lg">검사하기</button>
-                </div>
-                <hr class="my-2">
-                <p class="text-gray-500">검사기록이 없습니다.</p>
+<div class="w-1/5 ml-4 bg-white p-6 shadow-lg rounded-lg">
+    <div class="flex justify-between items-center">
+        <h3 class="text-lg font-bold">검사 기록</h3>
+        <button @click="showTestModal = true"
+            class="px-3 py-1 bg-blue-500 text-white text-sm font-semibold rounded-lg">검사하기</button>
+    </div>
+    <hr class="my-2">
+
+    <!-- ✅ 검사 기록이 없을 경우 -->
+    <p v-if="formattedExamRecords.length === 0" class="text-gray-500">검사기록이 없습니다.</p>
+
+    <!-- ✅ 검사 기록이 있을 경우 -->
+    <ul v-else>
+        <li v-for="record in formattedExamRecords" :key="record.date" class="flex items-center justify-between py-2 border-b">
+            <span class="text-gray-700">{{ record.date.replace(/-/g, '.') }} 검사</span>
+            <div class="flex items-center space-x-2">
+                <span v-for="exam in record.displayedExams" :key="exam" class="px-2 py-1 text-xs font-bold text-white rounded-md"
+                      :class="[testStore.getTestStyle(exam).bg]">
+                    {{ exam }}
+                </span>
+                <span v-if="record.moreExams" class="text-sm font-semibold text-gray-600">
+                    {{ record.moreExams }}
+                </span>
             </div>
+        </li>
+    </ul>
+</div>
+
 
             <!-- ✅ 오른쪽: 빈 공간 유지 -->
             <div class="w-2/5"></div>

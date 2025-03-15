@@ -23,5 +23,10 @@ export const useTestStore = defineStore('testStore', {
             { id: "K-ASRS", name: "성인용 ADHD 자기보고 척도", color: "text-blue-400", bg: "bg-blue-100" },
             { id: "K-RRS", name: "반추적 반응양식 척도", color: "text-orange-300", bg: "bg-orange-100" }
         ]
-    })
+    }),
+    getters: {
+        getTestStyle: (state) => (testId: string) => {
+            return state.testCategories.find(test => test.id === testId) || { color: '', bg: '' };
+        }
+    }
 });
