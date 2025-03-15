@@ -161,7 +161,7 @@ const formattedExamRecords = computed(() => {
                     <div v-for="graph in testStore.testCategories" :key="graph.id" class="border p-4 mb-2 rounded-lg">
                         <div class="flex items-center space-x-2">
                             <span :class="[graph.bg, 'px-2 py-1 rounded text-xs font-bold text-white']">{{ graph.id
-                            }}</span>
+                                }}</span>
                             <p class="text-sm font-semibold">{{ graph.name }}</p>
                         </div>
                         <div class="h-32 w-full">
@@ -184,7 +184,10 @@ const formattedExamRecords = computed(() => {
                     <div class="flex justify-between items-center">
                         <h3 class="text-lg font-bold">검사기록</h3>
                         <button @click="showTestModal = true"
-                            class="px-3 py-1 bg-blue-500 text-white text-sm font-semibold rounded-lg">검사하기</button>
+                            class="px-1 py-1 border border-black text-black text-sm font-semibold rounded-lg hover:bg-gray-100 transition">
+                            검사하기
+                        </button>
+
                     </div>
                     <hr class="my-2">
 
@@ -204,7 +207,8 @@ const formattedExamRecords = computed(() => {
                             <!-- ✅ 두 번째 줄: 검사 종류 (들여쓰기 추가) -->
                             <div class="ml-5 flex flex-wrap items-center gap-2 mt-1">
                                 <span v-for="exam in record.displayedExams" :key="exam"
-                                    class="px-2 py-1 rounded text-xs font-bold" :class="[testStore.testCategories.find(test => test.id === exam)?.bg || 'bg-gray-200',
+                                    class="px-2 py-1 rounded text-xs font-bold"
+                                    :class="[testStore.testCategories.find(test => test.id === exam)?.bg || 'bg-gray-200',
                                     testStore.testCategories.find(test => test.id === exam)?.color || 'text-gray-800']">
                                     {{ exam }}
                                 </span>
