@@ -184,7 +184,7 @@ const formattedExamRecords = computed(() => {
                     <div class="flex justify-between items-center">
                         <h3 class="text-lg font-bold">검사기록</h3>
                         <button @click="showTestModal = true"
-                            class="px-3 py-1 border border-black text-black text-sm font-semibold rounded-lg hover:bg-gray-100 transition">
+                            class="px-1 py-1 border border-black text-black text-sm font-semibold rounded-lg hover:bg-gray-100 transition">
                             검사하기
                         </button>
 
