@@ -160,8 +160,11 @@ const formattedExamRecords = computed(() => {
                 <div class="overflow-y-scroll max-h-[500px]">
                     <div v-for="graph in testStore.testCategories" :key="graph.id" class="border p-4 mb-2 rounded-lg">
                         <div class="flex items-center space-x-2">
-                            <span :class="[graph.bg, 'px-2 py-1 rounded text-xs font-bold text-white']">{{ graph.id
-                                }}</span>
+                            <span class="px-2 py-1 rounded text-xs font-bold" :class="[testStore.testCategories.find(test => test.id === graph.id)?.bg || 'bg-gray-200',
+                            testStore.testCategories.find(test => test.id === graph.id)?.color || 'text-gray-800']">
+                                {{ graph.id }}
+                            </span>
+
                             <p class="text-sm font-semibold">{{ graph.name }}</p>
                         </div>
                         <div class="h-32 w-full">
