@@ -53,7 +53,7 @@ defineExpose({ updateSelectedDate });
         <div class="relative">
             <!-- ✅ 현재 선택된 값 -->
             <div @click="isDropdownOpen = !isDropdownOpen"
-                class="border rounded px-4 py-2 cursor-pointer flex items-center justify-between">
+                class="border w-50 rounded px-4 py-2 cursor-pointer flex items-center justify-between">
                 <span v-if="selectedTest" class="px-2 py-1 rounded text-xs font-bold" :class="[testStore.testCategories.find(test => test.id === selectedTest)?.bg || 'bg-gray-200',
                 testStore.testCategories.find(test => test.id === selectedTest)?.color || 'text-gray-800']">
                     {{ selectedTest }}
@@ -63,7 +63,7 @@ defineExpose({ updateSelectedDate });
             </div>
 
             <!-- ✅ 옵션 리스트 -->
-            <div v-if="isDropdownOpen" class="absolute w-full mt-1 bg-white border shadow-md rounded-lg z-10">
+            <div v-if="isDropdownOpen" class="absolute w-50 px-2 bg-white border shadow-md rounded-lg z-10">
                 <div v-for="test in filteredTests" :key="test" @click="selectedTest = test; isDropdownOpen = false"
                     class="p-2 cursor-pointer flex items-center hover:bg-gray-100">
 
