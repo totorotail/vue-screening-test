@@ -44,7 +44,10 @@ defineExpose({ updateSelectedDate });
 
 <template>
     <div v-if="selectedDate" class="bg-white p-6 shadow-lg rounded-lg">
-        <h3 class="text-lg font-bold">{{ selectedDate.replace(/-/g, '.') }} 검사</h3>
+        <div class="flex justify-between items-center mb-2">
+            <h3 class="text-lg font-bold">{{ selectedDate.replace(/-/g, '.') }} 검사</h3>
+            <button class="px-3 py-1 bg-gray-300 text-sm font-semibold rounded-md">PRINT</button>
+        </div>
 
         <!-- ✅ 검사 선택 -->
         <div class="relative">
@@ -75,7 +78,7 @@ defineExpose({ updateSelectedDate });
 
 
         <!-- ✅ 총 그래프에서 선택된 검사만 표시 -->
-        <TotalGraph v-if="selectedTest" :patient="patient" :selectedTest="selectedTest" />
+        <TotalGraph v-if="selectedTest" :patient="patient" :selectedTest="selectedTest" :hideHeader="true" />
 
         <!-- ✅ 설명 및 질문 목록 -->
         <p v-if="selectedTestDetails" class="text-gray-700 text-sm mt-4">

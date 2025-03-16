@@ -3,7 +3,7 @@ import { computed, ref, watch, toRaw, nextTick } from 'vue';
 import { GChart } from 'vue-google-charts';
 import { useTestStore } from '../stores/testStore';
 
-const props = defineProps<{ patient: any, selectedTest?: string }>();
+const props = defineProps<{ patient: any, selectedTest?: string, hideHeader?: boolean }>();
 
 const testStore = useTestStore();
 
@@ -95,7 +95,8 @@ interface ExamResult {
 
 <template>
     <div>
-        <div class="flex justify-between items-center mb-2">
+        <!-- ✅ hideHeader가 false일 때만 제목과 버튼을 표시 -->
+        <div v-if="!hideHeader" class="flex justify-between items-center mb-2">
             <h3 class="text-lg font-bold">총 그래프</h3>
             <button class="px-3 py-1 bg-gray-300 text-sm font-semibold rounded-md">PRINT</button>
         </div>
