@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/authStore';
 import { useTestStore } from '../stores/testStore';
 import WideLogo from '../components/WideLogo.vue';
+import PatientInfo from '../components/PatientInfo.vue';
 import EditPatientInfoModal from '../components/EditPatientInfoModal.vue';
 import SelectTestModal from '../components/SelectTestModal.vue';
 import { GChart } from 'vue-google-charts';
@@ -30,13 +31,6 @@ const fetchPatient = () => {
 watch(() => authStore.user, (newUser) => {
     if (newUser) fetchPatient();
 }, { immediate: true });
-
-// ✅ 주민등록번호로 성별 판별
-const gender = computed(() => {
-    if (!patient.value || !patient.value.idNumber) return '없음';
-    const genderDigit = patient.value.idNumber.charAt(7);
-    return genderDigit === '1' || genderDigit === '3' ? '남자' : '여자';
-});
 
 // ✅ 모달창 상태
 const showModal = ref(false);
@@ -194,24 +188,7 @@ const formattedExamRecords = computed(() => {
         <div class="w-[90%] max-w-[1400px] flex mt-4">
             <!-- ✅ 왼쪽: 환자 정보 -->
             <div class="w-2/5 bg-white p-6 shadow-lg rounded-lg">
-                <div class="flex justify-between items-center">
-                    <p class="font-bold text-lg">{{ patient?.name || '없음' }}</p>
-                    <img src="../assets/setting-icon.png" alt="설정" class="w-6 h-6 cursor-pointer"
-                        @click="showModal = true">
-                </div>
-
-                <!-- ✅ 환자 정보 정리 (가로 정렬) -->
-                <div class="mt-4">
-                    <div class="flex space-x-4 text-gray-600 mt-1">
-                        <span>{{ patient?.birthDate?.replace(/-/g, '.') || '없음' }}</span>
-                        <span>|</span>
-                        <span>{{ gender }}</span>
-                        <span>|</span>
-                        <span>{{ patient?.phone || '없음' }}</span>
-                        <span>|</span>
-                        <span>{{ patient?.patientNumber || '없음' }}</span>
-                    </div>
-                </div>
+                <PatientInfo :patient="patient" @editPatient="showModal = true" />
 
                 <hr class="my-4 border-gray-300">
 
