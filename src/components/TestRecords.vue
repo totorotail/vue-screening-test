@@ -6,7 +6,7 @@ const props = defineProps<{ patient: any }>();
 const emit = defineEmits(['startTest', 'recordSelected']);
 
 // ✅ 선택된 검사 기록 (체크박스 상태 관리)
-const selectedRecords = ref<string[]>([]);
+const selectedRecord = ref<string | null>(null);
 
 // ✅ 한 페이지에 표시할 검사 기록 수
 const itemsPerPage = 5;
@@ -51,6 +51,7 @@ interface ExamResult {
 }
 
 const selectRecord = (date: string) => {
+    selectedRecord.value = date;
     emit('recordSelected', date);
 };
 
@@ -80,7 +81,7 @@ const testStore = useTestStore();
                 <li v-for="record in paginatedExamRecords" :key="record.date" @click="selectRecord(record.date)" class="py-3 border-b">
                     <!-- ✅ 첫 번째 줄: 체크박스 + 날짜 + '검사' -->
                     <div class="flex items-center space-x-2">
-                        <input type="checkbox" v-model="selectedRecords" :value="record.date" class="cursor-pointer">
+                        <input type="radio" v-model="selectedRecord" :value="record.date" class="cursor-pointer">
                         <span class="text-gray-700">{{ record.date.replace(/-/g, '.') }} 검사</span>
                     </div>
 
