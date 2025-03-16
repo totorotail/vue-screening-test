@@ -95,8 +95,10 @@ interface ExamResult {
 
 <template>
     <div>
-        <h3 class="text-lg font-bold">총 그래프</h3>
-        <button class="px-3 py-1 bg-gray-300 text-sm font-semibold rounded-md">PRINT</button>
+        <div class="flex justify-between items-center mb-2">
+            <h3 class="text-lg font-bold">총 그래프</h3>
+            <button class="px-3 py-1 bg-gray-300 text-sm font-semibold rounded-md">PRINT</button>
+        </div>
 
         <div class="overflow-y-scroll max-h-[500px]">
             <div v-for="graph in filteredGraphs" :key="graph.id" class="border p-4 mb-2 rounded-lg">
@@ -127,4 +129,3 @@ interface ExamResult {
         </div>
     </div>
 </template>
-
