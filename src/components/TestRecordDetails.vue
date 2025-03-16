@@ -37,7 +37,7 @@ defineExpose({ updateSelectedDate });
 
 <template>
     <div v-if="selectedDate" class="bg-white p-6 shadow-lg rounded-lg">
-        <h3 class="text-lg font-bold">{{ selectedDate }} 검사</h3>
+        <h3 class="text-lg font-bold">{{ selectedDate.replace(/-/g, '.') }} 검사</h3>
 
         <!-- ✅ 검사 선택 -->
         <select v-model="selectedTest" class="border px-2 py-1 rounded mt-2 w-full">
