@@ -3,7 +3,7 @@ import { computed, ref, watch, toRaw, nextTick } from 'vue';
 import { GChart } from 'vue-google-charts';
 import { useTestStore } from '../stores/testStore';
 
-const props = defineProps<{ patient: any }>();
+const props = defineProps<{ patient: any, selectedTest?: string }>();
 
 const testStore = useTestStore();
 
@@ -79,6 +79,13 @@ const chartOptions = computed(() => ({
 // ✅ `chartData[graph.id]`가 `undefined`일 경우 빈 배열 반환
 const safeChartData = (graphId: string) => chartData.value?.[graphId] ?? [["날짜", "점수"], [new Date(), 0]];
 
+// ✅ 선택된 검사만 필터링하여 표시 (없으면 모든 검사 표시)
+const filteredGraphs = computed(() => {
+    return props.selectedTest
+        ? testStore.testCategories.filter(test => test.id === props.selectedTest)
+        : testStore.testCategories;
+});
+
 // ✅ ExamResult 타입 직접 정의
 interface ExamResult {
     totalScore: number;
@@ -92,7 +99,7 @@ interface ExamResult {
         <button class="px-3 py-1 bg-gray-300 text-sm font-semibold rounded-md">PRINT</button>
 
         <div class="overflow-y-scroll max-h-[500px]">
-            <div v-for="graph in testStore.testCategories" :key="graph.id" class="border p-4 mb-2 rounded-lg">
+            <div v-for="graph in filteredGraphs" :key="graph.id" class="border p-4 mb-2 rounded-lg">
                 <div class="flex items-center space-x-2">
                     <span class="px-2 py-1 rounded text-xs font-bold" :class="[
                         testStore.testCategories.find(test => test.id === graph.id)?.bg || 'bg-gray-200',
@@ -120,3 +127,4 @@ interface ExamResult {
         </div>
     </div>
 </template>
+
