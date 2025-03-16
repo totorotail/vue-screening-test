@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useTestDetailsStore } from '../stores/testDetailsStore';
+import { useTestStore } from '../stores/testStore';
 import TotalGraph from '../components/TotalGraph.vue';
 
+const testStore = useTestStore();
+const isDropdownOpen = ref(false);
 const props = defineProps<{ patient: any }>();
 const testDetailsStore = useTestDetailsStore();
 
@@ -13,6 +16,10 @@ const selectedTest = ref<string>(''); // ✅ 초기값을 빈 문자열로 설�
 const availableTests = computed<string[]>(() => {
     if (!selectedDate.value || !props.patient?.examRecords) return [];
     return Object.keys(props.patient.examRecords[selectedDate.value] || {});
+});
+
+const filteredTests = computed(() => {
+    return availableTests.value.filter(t => t !== selectedTest.value);
 });
 
 // ✅ 현재 선택된 검사 데이터 가져오기
@@ -40,11 +47,32 @@ defineExpose({ updateSelectedDate });
         <h3 class="text-lg font-bold">{{ selectedDate.replace(/-/g, '.') }} 검사</h3>
 
         <!-- ✅ 검사 선택 -->
-        <select v-model="selectedTest" class="border px-2 py-1 rounded mt-2 w-full">
-            <option v-for="test in availableTests" :key="test" :value="test">
-                {{ test }}
-            </option>
-        </select>
+        <div class="relative">
+            <!-- ✅ 현재 선택된 값 -->
+            <div @click="isDropdownOpen = !isDropdownOpen"
+                class="border rounded px-4 py-2 cursor-pointer flex items-center justify-between">
+                <span v-if="selectedTest" class="px-2 py-1 rounded text-xs font-bold" :class="[testStore.testCategories.find(test => test.id === selectedTest)?.bg || 'bg-gray-200',
+                testStore.testCategories.find(test => test.id === selectedTest)?.color || 'text-gray-800']">
+                    {{ selectedTest }}
+                </span>
+                <span v-else class="text-gray-400">검사를 선택하세요</span>
+                <span class="ml-auto">&#9662;</span>
+            </div>
+
+            <!-- ✅ 옵션 리스트 -->
+            <div v-if="isDropdownOpen" class="absolute w-full mt-1 bg-white border shadow-md rounded-lg z-10">
+                <div v-for="test in filteredTests" :key="test" @click="selectedTest = test; isDropdownOpen = false"
+                    class="p-2 cursor-pointer flex items-center hover:bg-gray-100">
+
+                    <!-- ✅ 선택 가능한 검사 옵션 스타일 적용 -->
+                    <span class="px-2 py-1 rounded text-xs font-bold" :class="[testStore.testCategories.find(t => t.id === test)?.bg || 'bg-gray-200',
+                    testStore.testCategories.find(t => t.id === test)?.color || 'text-gray-800']">
+                        {{ test }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
 
         <!-- ✅ 총 그래프에서 선택된 검사만 표시 -->
         <TotalGraph v-if="selectedTest" :patient="patient" :selectedTest="selectedTest" />
