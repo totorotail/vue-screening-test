@@ -6,12 +6,14 @@ import WideLogo from '../components/WideLogo.vue';
 import PatientInfo from '../components/PatientInfo.vue';
 import TotalGraph from '../components/TotalGraph.vue';
 import TestRecords from '../components/TestRecords.vue';
+import TestRecordDetails from '../components/TestRecordDetails.vue';
 import EditPatientInfoModal from '../components/EditPatientInfoModal.vue';
 import SelectTestModal from '../components/SelectTestModal.vue';
 
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
+const testRecordDetailsRef = ref<InstanceType<typeof TestRecordDetails> | null>(null);
 
 // ✅ 환자 정보 가져오기
 const patient = ref<any>(null);
@@ -60,6 +62,13 @@ const handleStartTest = () => {
     showTestModal.value = true;
 };
 
+// ✅ 검사 기록에서 선택한 날짜 전달
+const handleRecordSelection = (date: string) => {
+    if (testRecordDetailsRef.value) {
+        testRecordDetailsRef.value.updateSelectedDate(date);
+    }
+};
+
 </script>
 
 <template>
@@ -84,12 +93,12 @@ const handleStartTest = () => {
 
             <!-- ✅ 중앙: 검사 기록 -->
             <div class="w-1/5 ml-4">
-                <TestRecords :patient="patient" @startTest="handleStartTest" />
+                <TestRecords :patient="patient" @startTest="handleStartTest" @recordSelected="handleRecordSelection" />
             </div>
 
             <!-- ✅ 오른쪽: 빈 공간 유지 -->
             <div class="w-2/5">
-
+                <TestRecordDetails ref="testRecordDetailsRef" :patient="patient" />
             </div>
         </div>
     </div>

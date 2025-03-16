@@ -3,7 +3,7 @@ import { computed, ref } from 'vue';
 import { useTestStore } from '../stores/testStore';
 
 const props = defineProps<{ patient: any }>();
-const emit = defineEmits(['startTest']);
+const emit = defineEmits(['startTest', 'recordSelected']);
 
 // ✅ 선택된 검사 기록 (체크박스 상태 관리)
 const selectedRecords = ref<string[]>([]);
@@ -50,6 +50,10 @@ interface ExamResult {
     responses: number[];
 }
 
+const selectRecord = (date: string) => {
+    emit('recordSelected', date);
+};
+
 const testStore = useTestStore();
 </script>
 
@@ -73,7 +77,7 @@ const testStore = useTestStore();
 
             <!-- ✅ 검사 기록이 있을 경우 -->
             <ul v-else>
-                <li v-for="record in paginatedExamRecords" :key="record.date" class="py-3 border-b">
+                <li v-for="record in paginatedExamRecords" :key="record.date" @click="selectRecord(record.date)" class="py-3 border-b">
                     <!-- ✅ 첫 번째 줄: 체크박스 + 날짜 + '검사' -->
                     <div class="flex items-center space-x-2">
                         <input type="checkbox" v-model="selectedRecords" :value="record.date" class="cursor-pointer">
