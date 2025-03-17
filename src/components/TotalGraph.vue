@@ -102,7 +102,7 @@ interface ExamResult {
         </div>
 
         <div class="overflow-y-scroll max-h-[500px]">
-            <div v-for="graph in filteredGraphs" :key="graph.id" class="border p-4 mb-2 rounded-lg">
+            <div v-for="graph in filteredGraphs" :key="graph.id" class="p-4 mb-2">
                 <div class="flex items-center space-x-2">
                     <span class="px-2 py-1 rounded text-xs font-bold" :class="[
                         testStore.testCategories.find(test => test.id === graph.id)?.bg || 'bg-gray-200',
