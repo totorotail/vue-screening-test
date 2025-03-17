@@ -52,7 +52,7 @@ export const useAuthStore = defineStore("auth", {
     login(email: string, password: string): boolean {
       if (email === "admin@example.com" && password === "Admin123!") {
         const examRecords = {
-          "2024-11-31": {
+          "2024-11-20": {
             "AUDIT": { responses: [2, 3, 2, 1, 3], totalScore: calculateTotalScore([2, 3, 2, 1, 3]) },
             "BAI": { responses: [3, 3, 2, 3, 3], totalScore: calculateTotalScore([3, 3, 2, 3, 3]) },
             "PDSS": { responses: [2, 2, 3, 2, 2], totalScore: calculateTotalScore([2, 2, 3, 2, 2]) }
