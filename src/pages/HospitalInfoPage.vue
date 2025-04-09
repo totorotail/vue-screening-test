@@ -11,9 +11,9 @@ const authStore = useAuthStore();
 const userInfo = computed(() => authStore.user || { email: '', hospitalName: '', location: '', plan: '' });
 
 const availablePlans = [
-    { name: 'STARTER', price: '0원 / 월', benefits: ['✔️ 베네핏내용1']},
-    { name: 'BASIC', price: '12,000원 / 월', benefits: ['✔️ 베네핏내용1', '✔️ 베네핏내용2']},
-    { name: 'PREMIUM', price: '20,000원 / 월', benefits: ['✔️ 베네핏내용1', '✔️ 베네핏내용2', '✔️ 베네핏내용3']}
+    { name: 'STARTER', price: '0원 / 월', benefits: ['✔️ 베네핏내용1'] },
+    { name: 'BASIC', price: '12,000원 / 월', benefits: ['✔️ 베네핏내용1', '✔️ 베네핏내용2'] },
+    { name: 'PREMIUM', price: '20,000원 / 월', benefits: ['✔️ 베네핏내용1', '✔️ 베네핏내용2', '✔️ 베네핏내용3'] }
 ];
 
 // 상태 변수
@@ -88,35 +88,39 @@ const closePage = () => {
             <!-- 플랜 변경 -->
             <div class="w-2/3 bg-white shadow-lg rounded-lg p-6">
                 <h2 class="text-lg font-bold mb-4">플랜변경</h2>
-                <div class="flex space-x-4">
-                    <div v-for="plan in availablePlans" :key="plan.name"
-                        class="flex-1 border rounded-lg overflow-hidden">
-                        <!-- 상단 컬러 바 -->
-                        <div :class="[
-                            plan.name === 'STARTER' ? 'bg-gray-100' :
-                                plan.name === 'BASIC' ? 'bg-blue-500' :
-                                    'bg-black',
-                            'h-2'
-                        ]"></div>
-                        <!-- 카드 내용 -->
-                        <div class="text-center px-3 py-4">
-                            <h3 class="font-bold mb-1">{{ plan.name }}</h3>
-                            <p class="mb-3">{{ plan.price }}</p>
+                <div class="border-b border-gray-200 mb-4 mt-1"></div>
+                <div class="w-[80%] mx-auto">
+                    <div class="flex space-x-4">
+                        <div v-for="plan in availablePlans" :key="plan.name"
+                            class="flex-1 border rounded-lg overflow-hidden">
+                            <!-- 상단 컬러 바 -->
+                            <div :class="[
+                                plan.name === 'STARTER' ? 'bg-gray-100' :
+                                    plan.name === 'BASIC' ? 'bg-blue-500' :
+                                        'bg-black',
+                                'h-2'
+                            ]"></div>
+                            <!-- 카드 내용 -->
+                            <div class="text-center px-3 py-10">
+                                <h3 class="mb-2">{{ plan.name }}</h3>
+                                <p class="font-bold mb-4">{{ plan.price }}</p>
 
-                            <button v-if="userInfo.plan === plan.name"
-                                class="w-full py-2 border rounded-lg cursor-not-allowed">
-                                {{ plan.name }} 플랜중
-                            </button>
+                                <button v-if="userInfo.plan === plan.name"
+                                    class="w-full py-1 border rounded-lg cursor-not-allowed">
+                                    {{ plan.name }} 플랜중
+                                </button>
 
-                            <button v-else @click="openPlanModal(plan.name)" class="w-full py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition">
-                                {{ plan.name }} 플랜변경
-                            </button>
+                                <button v-else @click="openPlanModal(plan.name)"
+                                    class="w-full py-1 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition">
+                                    {{ plan.name }} 플랜변경
+                                </button>
 
-                            <div class="mt-3 text-left">
-                                <p v-for="benefit in plan.benefits" :key="benefit" class="text-sm flex items-start">
-                                    <span class="text-green-600 mr-1">✓</span>
-                                    {{ benefit.replace('✔️ ', '') }}
-                                </p>
+                                <div class="mt-4 text-left">
+                                    <p v-for="benefit in plan.benefits" :key="benefit" class="text-sm flex items-start">
+                                        <span class="text-green-600 mr-1 mb-1">✓</span>
+                                        {{ benefit.replace('✔️ ', '') }}
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
