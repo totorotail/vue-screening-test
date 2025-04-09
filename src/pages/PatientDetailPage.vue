@@ -73,14 +73,14 @@ const handleRecordSelection = (date: string) => {
 
 <template>
     <div class="flex flex-col items-center min-h-screen bg-gray-50 w-full">
-        <WideLogo class="w-[90%] max-w-[1400px] mt-6 mb-6" :showSearch="true" :userPlan="authStore.user?.plan || ''" />
+        <WideLogo class="w-[90%] max-w-[1400px] mt-4 mb-6" :showSearch="true" :userPlan="authStore.user?.plan || ''" />
 
-        <div class="w-[90%] max-w-[1400px] bg-white px-6 py-4 shadow-md rounded-lg flex justify-between">
+        <div class="w-[90%] max-w-[1400px] flex justify-between items-center bg-white px-6 py-3 shadow-md rounded-lg mb-2">
             <h2 class="text-xl font-semibold text-gray-800">환자 상세보기</h2>
             <img src="../assets/close-icon.png" alt="닫기" class="w-6 h-6 cursor-pointer">
         </div>
 
-        <div class="w-[90%] max-w-[1400px] flex mt-4">
+        <div class="w-[90%] max-w-[1400px] flex">
             <!-- ✅ 왼쪽: 환자 정보 -->
             <div class="w-2/5 bg-white p-6 shadow-lg rounded-lg">
                 <PatientInfo :patient="patient" @editPatient="showModal = true" />
