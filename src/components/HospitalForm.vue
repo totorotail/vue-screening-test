@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import TermsCheckbox from '../components/TermsCheckbox.vue';
 
 const email = ref('');
 const password = ref('');
@@ -26,12 +27,6 @@ const checkEmail = () => {
 
 const checkPassword = () => {
     showPasswordError.value = password.value !== '' && confirmPassword.value !== '' && password.value !== confirmPassword.value;
-};
-
-// 전체 약관 동의 처리
-const handleAllTermsChange = (event: Event) => {
-    const checked = (event.target as HTMLInputElement).checked;
-    termsAgreed.value = termsAgreed.value.map(() => checked);
 };
 
 // 가입완료 버튼 활성화 조건 계산
@@ -143,65 +138,8 @@ const handleSubmit = () => {
                 </select>
             </div>
 
-            <!-- 약관 동의 섹션 -->
-            <div class="mt-2">
-                <div class="flex items-center">
-                    <input 
-                        type="checkbox" 
-                        id="allTerms"
-                        class="mr-2 h-4 w-4"
-                        :checked="termsAgreed.every(t => t)"
-                        @change="handleAllTermsChange"
-                    >
-                    <label for="allTerms" class="text-sm font-bold">전체 약관에 동의합니다.</label>
-                </div>
-                
-                <div class="space-y-2 mt-2 pl-6">
-                    <div class="flex items-center">
-                        <input 
-                            type="checkbox" 
-                            id="terms1" 
-                            v-model="termsAgreed[0]"
-                            class="mr-2 h-4 w-4"
-                        >
-                        <label for="terms1" class="text-xs text-gray-700">(필수) 이용약관에 동의 합니다.</label>
-                        <button class="ml-auto text-xs text-gray-500">보기</button>
-                    </div>
-                    
-                    <div class="flex items-center">
-                        <input 
-                            type="checkbox" 
-                            id="terms2" 
-                            v-model="termsAgreed[1]"
-                            class="mr-2 h-4 w-4"
-                        >
-                        <label for="terms2" class="text-xs text-gray-700">(필수) 개인정보 수집 및 이용에 대해 동의합니다.</label>
-                        <button class="ml-auto text-xs text-gray-500">보기</button>
-                    </div>
-                    
-                    <div class="flex items-center">
-                        <input 
-                            type="checkbox" 
-                            id="terms3" 
-                            v-model="termsAgreed[2]"
-                            class="mr-2 h-4 w-4"
-                        >
-                        <label for="terms3" class="text-xs text-gray-700">(필수) 만 14세 이상입니다.</label>
-                        <button class="ml-auto text-xs text-gray-500">보기</button>
-                    </div>
-                    
-                    <div class="flex items-center">
-                        <input 
-                            type="checkbox" 
-                            id="terms4" 
-                            v-model="termsAgreed[3]"
-                            class="mr-2 h-4 w-4"
-                        >
-                        <label for="terms4" class="text-xs text-gray-700">(선택) 이벤트 및 마케팅 활용에 동의합니다.</label>
-                        <button class="ml-auto text-xs text-gray-500">보기</button>
-                    </div>
-                </div>
-            </div>
+            <!-- 약관 동의 컴포넌트 -->
+            <TermsCheckbox v-model="termsAgreed" />
 
             <p v-if="errorMessage" class="text-red-500 text-sm text-center">{{ errorMessage }}</p>
 
