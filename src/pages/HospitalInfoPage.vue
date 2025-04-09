@@ -11,9 +11,9 @@ const authStore = useAuthStore();
 const userInfo = computed(() => authStore.user || { email: '', hospitalName: '', location: '', plan: '' });
 
 const availablePlans = [
-    { name: 'STARTER', price: '0원 / 월', benefits: ['✔️ 베네핏내용1'] },
-    { name: 'BASIC', price: '12,000원 / 월', benefits: ['✔️ 베네핏내용1', '✔️ 베네핏내용2'] },
-    { name: 'PREMIUM', price: '20,000원 / 월', benefits: ['✔️ 베네핏내용1', '✔️ 베네핏내용2', '✔️ 베네핏내용3'] }
+    { name: 'STARTER', price: '0원 / 월', benefits: ['✔️ 베네핏내용1']},
+    { name: 'BASIC', price: '12,000원 / 월', benefits: ['✔️ 베네핏내용1', '✔️ 베네핏내용2']},
+    { name: 'PREMIUM', price: '20,000원 / 월', benefits: ['✔️ 베네핏내용1', '✔️ 베네핏내용2', '✔️ 베네핏내용3']}
 ];
 
 // 상태 변수
@@ -68,13 +68,19 @@ const closePage = () => {
         <div class="w-[90%] max-w-[1400px] flex mt-6 space-x-6">
             <!-- 병원 정보 -->
             <div class="w-1/3 bg-white shadow-lg rounded-lg p-6">
-                <p class="text-gray-600"><strong>이메일:</strong> {{ userInfo.email }}</p>
-                <p class="text-gray-600"><strong>병원이름:</strong> {{ userInfo.hospitalName }}</p>
-                <p class="text-gray-600"><strong>지역:</strong> {{ userInfo.location }}</p>
-                <p class="text-gray-600"><strong>플랜:</strong> {{ userInfo.plan }}</p>
-                <div class="mt-4 flex">
-                    <button @click="openEditModal" class="bg-gray-200 p-2 rounded-full hover:bg-gray-300 transition">
-                        ⚙️ 설정
+                <div class="grid grid-cols-[80px_1fr] gap-1">
+                    <div class="font-semibold">이메일</div>
+                    <div>{{ userInfo.email }}</div>
+                    <div class="font-semibold">병원이름</div>
+                    <div>{{ userInfo.hospitalName }}</div>
+                    <div class="font-semibold">지역</div>
+                    <div>{{ userInfo.location }}</div>
+                    <div class="font-semibold">플랜</div>
+                    <div>{{ userInfo.plan }}</div>
+                </div>
+                <div class="mt-4">
+                    <button @click="openEditModal">
+                        <img src="src/assets/setting-icon.png" class="w-6 h-6" alt="설정" />
                     </button>
                 </div>
             </div>
@@ -84,24 +90,35 @@ const closePage = () => {
                 <h2 class="text-lg font-bold mb-4">플랜변경</h2>
                 <div class="flex space-x-4">
                     <div v-for="plan in availablePlans" :key="plan.name"
-                        class="flex-1 p-4 border rounded-lg shadow-lg text-center"
-                        :class="{ 'border-blue-500': userInfo.plan === plan.name }">
-                        <h3 class="text-lg font-bold">{{ plan.name }}</h3>
-                        <p class="text-gray-600">{{ plan.price }}</p>
+                        class="flex-1 border rounded-lg overflow-hidden">
+                        <!-- 상단 컬러 바 -->
+                        <div :class="[
+                            plan.name === 'STARTER' ? 'bg-gray-100' :
+                                plan.name === 'BASIC' ? 'bg-blue-500' :
+                                    'bg-black',
+                            'h-2'
+                        ]"></div>
+                        <!-- 카드 내용 -->
+                        <div class="text-center px-3 py-4">
+                            <h3 class="font-bold mb-1">{{ plan.name }}</h3>
+                            <p class="mb-3">{{ plan.price }}</p>
 
-                        <button v-if="userInfo.plan === plan.name"
-                            class="mt-2 w-full py-2 border rounded-lg bg-gray-200 opacity-50 cursor-not-allowed">
-                            {{ plan.name }} 플랜중
-                        </button>
+                            <button v-if="userInfo.plan === plan.name"
+                                class="w-full py-2 border rounded-lg cursor-not-allowed">
+                                {{ plan.name }} 플랜중
+                            </button>
 
-                        <button v-else @click="openPlanModal(plan.name)"
-                            class="mt-2 w-full py-2 border rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition">
-                            {{ plan.name }} 플랜변경
-                        </button>
+                            <button v-else @click="openPlanModal(plan.name)" class="w-full py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition">
+                                {{ plan.name }} 플랜변경
+                            </button>
 
-                        <ul class="mt-2 text-sm text-gray-700 text-left">
-                            <li v-for="benefit in plan.benefits" :key="benefit">{{ benefit }}</li>
-                        </ul>
+                            <div class="mt-3 text-left">
+                                <p v-for="benefit in plan.benefits" :key="benefit" class="text-sm flex items-start">
+                                    <span class="text-green-600 mr-1">✓</span>
+                                    {{ benefit.replace('✔️ ', '') }}
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
