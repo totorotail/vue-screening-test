@@ -75,7 +75,7 @@ const saveHospitalInfo = () => {
         <div class="mx-1 my-1 bg-white rounded-lg overflow-hidden shadow-sm">
             <!-- 본문 영역 -->
             <div class="p-6">
-                <div class="space-y-5">
+                <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">비밀번호 *</label>
                         <input v-model="password" type="password" 
