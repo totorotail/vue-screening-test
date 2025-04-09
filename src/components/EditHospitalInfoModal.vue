@@ -66,8 +66,8 @@ const saveHospitalInfo = () => {
         <!-- 헤더 영역 -->
         <div class="p-4 flex justify-between items-center bg-white rounded-t-lg">
             <h2 class="text-lg font-medium">병원정보 수정</h2>
-            <button @click="emit('close')">
-                <img src="src/assets/close-icon.png" class="w-5 h-5" alt="닫기" />
+            <button @click="emit('close')" class="text-gray-500 hover:text-gray-700">
+                <img src="../assets/close-icon.png" class="w-5 h-5" alt="닫기" />
             </button>
         </div>
         
@@ -79,26 +79,26 @@ const saveHospitalInfo = () => {
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">비밀번호 *</label>
                         <input v-model="password" type="password" 
-                            class="w-full px-3 py-3 border border-gray-200 rounded-md">
+                            class="w-full p-2 border border-gray-200 rounded-md">
                     </div>
                     
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">비밀번호 확인 *</label>
                         <input v-model="confirmPassword" type="password" @blur="checkPassword"
-                            class="w-full px-3 py-3 border border-gray-200 rounded-md">
+                            class="w-full p-2 border border-gray-200 rounded-md">
                         <p v-if="passwordError" class="text-orange-500 text-xs mt-1">{{ passwordError }}</p>
                     </div>
                     
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">병원명</label>
                         <input v-model="newHospitalName" type="text"
-                            class="w-full px-3 py-3 border border-gray-200 rounded-md">
+                            class="w-full p-2 border border-gray-200 rounded-md">
                     </div>
                     
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">병원위치</label>
                         <select v-model="newLocation" 
-                            class="w-full px-3 py-3 border border-gray-200 rounded-md appearance-none">
+                            class="w-full p-2 border border-gray-200 rounded-md appearance-none">
                             <option v-for="loc in hospitalLocations" :key="loc" :value="loc">
                                 {{ loc }}
                             </option>
