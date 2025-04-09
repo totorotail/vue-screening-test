@@ -114,8 +114,8 @@ const continueTest = () => {
         <!-- ✅ 타이틀 영역 -->
         <div class="w-[90%] max-w-[1400px] bg-white px-6 py-4 shadow-md rounded-lg flex justify-between items-center">
             <h2 class="text-lg font-bold">검사하기</h2>
-            <button @click="openExitModal" class="text-gray-600 hover:text-gray-800 text-xl">
-                <img src="../assets/close-icon.png" alt="닫기" class="w-6 h-6 cursor-pointer">
+            <button @click="openExitModal" class="text-gray-500 hover:text-gray-700">
+                <img src="../assets/close-icon.png" class="w-5 h-5" alt="닫기">
             </button>
         </div>
 

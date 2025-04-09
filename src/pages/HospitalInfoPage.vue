@@ -62,7 +62,9 @@ const closePage = () => {
         <div
             class="w-[90%] max-w-[1400px] flex justify-between items-center bg-white px-6 py-4 shadow-md rounded-lg mb-2">
             <h2 class="text-xl font-semibold text-gray-800">병원정보</h2>
-            <button @click="closePage" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            <button @click="closePage" class="text-gray-500 hover:text-gray-700">
+                <img src="../assets/close-icon.png" class="w-5 h-5" alt="닫기" />
+            </button>
         </div>
 
         <div class="w-[90%] max-w-[1400px] flex space-x-4">
