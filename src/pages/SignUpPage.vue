@@ -36,14 +36,14 @@ const closePage = () => {
 
         <!-- ✅ 타이틀 부분 (병원가입) -->
         <div
-            class="w-[90%] max-w-[1400px] flex justify-between items-center bg-white px-6 py-4 shadow-md rounded-lg mb-4">
-            <h2 class="text-xl font-semibold text-gray-800">병원가입</h2>
-            <button @click="closePage" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            class="w-[90%] max-w-[1400px] flex justify-between items-center bg-white px-6 py-3 shadow-md rounded-lg mb-2">
+            <h2 class="text-lg font-semibold text-gray-800">병원가입</h2>
+            <button @click="closePage" class="text-gray-500 hover:text-gray-700 text-xl">&times;</button>
         </div>
 
         <!-- ✅ 메인 부분 (병원정보보기 페이지와 동일한 너비 유지) -->
-        <div class="w-[90%] max-w-[1400px] bg-white p-8 shadow-lg rounded-lg mt-4 flex flex-col items-center">
-            <div v-if="!showForm" class="w-full">
+        <div class="w-[90%] max-w-[1400px] bg-white p-6 shadow-lg rounded-lg flex flex-col items-center">
+            <div v-if="!showForm" class="w-full max-w-[700px]">
                 <TermsAgreement v-model:agreed="agreed" />
 
                 <!-- NEXT 버튼을 둥글고 짧게 조정 -->
