@@ -45,14 +45,14 @@ const handleNext = () => {
 <template>
     <div>
         <div class="mb-6">
-            <label class="block text-gray-700 text-sm">이메일</label>
+            <label class="block text-gray-700 text-xs mb-1">이메일</label>
             <input v-model="email" type="email" placeholder="Example@example.com" 
                    class="w-full p-3 border rounded border-gray-300 bg-gray-50 mt-1" />
             <p v-if="showEmailError" class="text-orange-500 text-xs mt-1">이메일을 정확히 입력해주세요.</p>
         </div>
 
         <div class="mb-2">
-            <label class="block text-gray-700 text-sm">비밀번호</label>
+            <label class="block text-gray-700 text-xs mb-1">비밀번호</label>
             <input v-model="password" type="password" placeholder="영문 소문자, 대문자, 숫자 8자리 이상" 
                    class="w-full p-3 border rounded border-gray-300 bg-gray-50 mt-1" />
             <p v-if="showPasswordError" class="text-orange-500 text-xs mt-1">비밀번호가 맞지 않습니다.</p>
@@ -64,13 +64,13 @@ const handleNext = () => {
 
         <div class="flex justify-center space-x-4">
             <button @click="router.push('/signup')"
-                class="w-[45%] bg-white hover:bg-gray-100 text-black py-3 rounded-full font-bold border border-gray-300">
+                class="w-[120px] bg-white hover:bg-gray-100 text-black py-2.5 rounded-full font-bold text-sm border border-black-300">
                 SIGN UP
             </button>
             <button @click="handleNext"
                 :disabled="!isFormValid"
                 :class="[
-                    'w-[45%] py-3 rounded-full font-bold',
+                    'w-[120px] py-2.5 rounded-full font-bold text-sm',
                     isFormValid 
                         ? 'bg-blue-100 hover:bg-blue-200 text-blue-600 cursor-pointer' 
                         : 'bg-gray-100 text-gray-400 cursor-not-allowed'
