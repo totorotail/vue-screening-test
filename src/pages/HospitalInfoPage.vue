@@ -57,15 +57,15 @@ const closePage = () => {
 
 <template>
     <div class="min-h-screen bg-gray-100 flex flex-col items-center relative">
-        <WideLogo class="w-[90%] max-w-[1400px] mt-6 mb-6" :showSearch="true" :userPlan="userInfo.plan" />
+        <WideLogo class="w-[90%] max-w-[1400px] mt-4 mb-6" :showSearch="true" :userPlan="userInfo.plan" />
 
         <div
-            class="w-[90%] max-w-[1400px] flex justify-between items-center bg-white px-6 py-4 shadow-md rounded-lg mb-4">
+            class="w-[90%] max-w-[1400px] flex justify-between items-center bg-white px-6 py-4 shadow-md rounded-lg mb-2">
             <h2 class="text-xl font-semibold text-gray-800">병원정보</h2>
             <button @click="closePage" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
         </div>
 
-        <div class="w-[90%] max-w-[1400px] flex mt-6 space-x-6">
+        <div class="w-[90%] max-w-[1400px] flex space-x-4">
             <!-- 병원 정보 -->
             <div class="w-1/3 bg-white shadow-lg rounded-lg p-6">
                 <div class="grid grid-cols-[80px_1fr] gap-1">
