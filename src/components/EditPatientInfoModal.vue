@@ -1,16 +1,15 @@
 <script setup lang="ts">
-import { ref, defineProps, defineEmits, watch } from 'vue';
+import { ref, defineProps, defineEmits, watch, computed } from 'vue';
 import { useAuthStore } from '../stores/authStore';
 
 const authStore = useAuthStore();
 
 const props = defineProps({
-    patient: Object, // ✅ 부모 컴포넌트에서 전달된 환자 정보
+    patient: Object,
 });
 
 const emit = defineEmits(['close', 'update']);
 
-// ✅ 초기값을 위한 반응형 변수
 const editedPatient = ref({
     name: '',
     idNumber: '',
@@ -18,7 +17,64 @@ const editedPatient = ref({
     patientNumber: '',
 });
 
-// ✅ props에서 받은 환자 정보를 반응형 변수에 설정
+const showIdNumberError = ref(false);
+const showPhoneError = ref(false);
+const isIdFocused = ref(false);
+
+// 주민등록번호 마스킹 함수
+const maskIdNumber = (value: string) => {
+    const parts = value.split('-');
+    if (parts.length !== 2) return value;
+
+    const first = parts[0];
+    const second = parts[1];
+
+    if (second.length === 0) return value;
+    return `${first}-${second[0]}${'*'.repeat(second.length - 1)}`;
+};
+
+// 주민등록번호 입력 처리
+const handleIdNumberInput = (e: Event) => {
+    const target = e.target as HTMLInputElement;
+    let raw = target.value.replace(/[^\d]/g, '');
+    if (raw.length > 13) raw = raw.slice(0, 13);
+
+    if (raw.length > 6) {
+        editedPatient.value.idNumber = `${raw.slice(0, 6)}-${raw.slice(6)}`;
+    } else {
+        editedPatient.value.idNumber = raw;
+    }
+
+    validateIdNumber();
+};
+
+// 주민등록번호 형식 검증
+const validateIdNumber = () => {
+    const regex = /^\d{6}-\d{7}$/;
+    const isValid = regex.test(editedPatient.value.idNumber);
+    showIdNumberError.value = editedPatient.value.idNumber !== '' && !isValid;
+    return isValid;
+};
+
+// 연락처 형식 검증
+const validatePhone = () => {
+    const regex = /^\d{2,3}-\d{3,4}-\d{4}$/;
+    const isValid = regex.test(editedPatient.value.phone);
+    showPhoneError.value = editedPatient.value.phone !== '' && !isValid;
+    return isValid;
+};
+
+// 폼 유효성 검사
+const isFormValid = computed(() => {
+    return editedPatient.value.name !== '' &&
+        editedPatient.value.idNumber !== '' &&
+        validateIdNumber() &&
+        editedPatient.value.phone !== '' &&
+        validatePhone() &&
+        editedPatient.value.patientNumber !== '';
+});
+
+// props 값 반영
 watch(() => props.patient, (newPatient) => {
     if (newPatient) {
         editedPatient.value = {
@@ -27,12 +83,18 @@ watch(() => props.patient, (newPatient) => {
             phone: newPatient.phone || '',
             patientNumber: newPatient.patientNumber || ''
         };
+        validateIdNumber();
+        validatePhone();
     }
 }, { immediate: true });
 
-// ✅ 저장 버튼 클릭 시 실행
+// 연락처 자동 검증
+watch(() => editedPatient.value.phone, validatePhone);
+
+// 저장
 const savePatientInfo = () => {
-    // ✅ 환자번호 중복 검사
+    if (!isFormValid.value) return;
+
     const isDuplicate = authStore.isPatientIdDuplicate(editedPatient.value.patientNumber);
     if (isDuplicate && editedPatient.value.patientNumber !== props.patient?.patientNumber) {
         alert('동일한 환자번호가 이미 존재합니다.');
@@ -68,14 +130,20 @@ const savePatientInfo = () => {
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">주민번호 *</label>
-                        <input v-model="editedPatient.idNumber" type="text"
-                            class="w-full p-2 border border-gray-200 rounded-md" placeholder="000000-0000000">
+                        <input :value="isIdFocused ? editedPatient.idNumber : maskIdNumber(editedPatient.idNumber)"
+                            @focus="isIdFocused = true" @blur="isIdFocused = false" @input="handleIdNumberInput"
+                            type="text" class="w-full p-2 border border-gray-200 rounded-md"
+                            placeholder="000000-0000000" />
+                        <p v-if="showIdNumberError" class="text-orange-500 text-xs mt-1">
+                            주민번호를 정확히 입력해주세요.
+                        </p>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">연락처 *</label>
                         <input v-model="editedPatient.phone" type="text"
                             class="w-full p-2 border border-gray-200 rounded-md" placeholder="010-0000-0000">
+                        <p v-if="showPhoneError" class="text-orange-500 text-xs mt-1">연락처를 정확히 입력해주세요.</p>
                     </div>
 
                     <div>
@@ -87,15 +155,16 @@ const savePatientInfo = () => {
             </div>
 
             <!-- 버튼 영역 -->
-            <div class="px-6 pb-6 flex justify-between">
-                <button @click="emit('close')" class="px-4 py-2 border rounded-lg hover:bg-gray-200 transition">
-                    취소
-                </button>
-                <button @click="savePatientInfo"
-                    class="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition">
-                    CONFIRM
-                </button>
-            </div>
+            <div class="flex justify-center my-6">
+                    <button @click="savePatientInfo" :disabled="!isFormValid" :class="[
+                        'w-32 py-3 rounded-full transition',
+                        isFormValid
+                            ? 'bg-blue-500 hover:bg-blue-600 text-white'
+                            : 'bg-blue-200 text-white cursor-not-allowed'
+                    ]">
+                        CONFIRM
+                    </button>
+                </div>
         </div>
     </div>
 </template>

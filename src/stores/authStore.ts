@@ -13,7 +13,7 @@ interface Patient {
   idNumber: string;
   phone: string;
   lastExam: string | null;
-  examRecords: Record<string, Record<string, ExamResult>>; // ✅ 날짜별 검사 결과 저장
+  examRecords: Record<string, Record<string, ExamResult>>; // 날짜별 검사 결과 저장
 }
 
 interface User {
@@ -30,12 +30,12 @@ interface AuthState {
   errorMessage: string;
 }
 
-// ✅ 점수 자동 계산 함수
+// 점수 자동 계산 함수
 const calculateTotalScore = (responses: number[]): number => {
   return responses.reduce((sum, value) => sum + value, 0);
 };
 
-// ✅ 최신 검사 날짜를 찾는 함수
+// 최신 검사 날짜를 찾는 함수
 const getLatestExamDate = (examRecords: Record<string, Record<string, ExamResult>>): string | null => {
   const dates = Object.keys(examRecords);
   if (dates.length === 0) return null;
@@ -78,8 +78,8 @@ export const useAuthStore = defineStore("auth", {
               birthDate: "1990-10-10",
               idNumber: "901010-1012345",
               phone: "010-0123-4567",
-              examRecords, // ✅ 중복 제거하여 한 번만 사용
-              lastExam: getLatestExamDate(examRecords) // ✅ 최신 검사 날짜 자동 설정
+              examRecords, // 중복 제거하여 한 번만 사용
+              lastExam: getLatestExamDate(examRecords) // 최신 검사 날짜 자동 설정
             }
           ]
         };
@@ -116,7 +116,7 @@ export const useAuthStore = defineStore("auth", {
       }
     },
 
-    // ✅ 검사 기록 추가 함수 (점수 자동 계산 & lastExam 자동 업데이트)
+    // 검사 기록 추가 함수 (점수 자동 계산 & lastExam 자동 업데이트)
     addExamRecord(patientNumber: string, date: string, examType: string, responses: number[]) {
       if (!this.user) return;
       const patient = this.user.patients.find(p => p.patientNumber === patientNumber);
@@ -131,7 +131,7 @@ export const useAuthStore = defineStore("auth", {
         totalScore: calculateTotalScore(responses)
       };
 
-      // ✅ 최신 검사 날짜 자동 업데이트
+      // 최신 검사 날짜 자동 업데이트
       patient.lastExam = getLatestExamDate(patient.examRecords);
     }
   }

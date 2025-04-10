@@ -4,14 +4,14 @@ import { computed } from 'vue';
 const props = defineProps<{ patient: any }>();
 const emit = defineEmits(['editPatient']);
 
-// ✅ 성별 판별
+// 성별 판별
 const gender = computed(() => {
     if (!props.patient || !props.patient.idNumber) return '없음';
     const genderDigit = props.patient.idNumber.charAt(7);
     return genderDigit === '1' || genderDigit === '3' ? '남자' : '여자';
 });
 
-// ✅ 생년월일 포맷 변경
+// 생년월일 포맷 변경
 const formattedBirthDate = computed(() => {
     return props.patient?.birthDate ? props.patient.birthDate.replace(/-/g, '.') : '없음';
 });

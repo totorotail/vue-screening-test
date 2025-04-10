@@ -7,36 +7,35 @@ import { faMagnifyingGlass, faUserPlus } from '@fortawesome/free-solid-svg-icons
 const router = useRouter();
 const route = useRoute();
 
-// ✅ Props 정의 (showSearch, userPlan)
 const props = defineProps({
     showSearch: Boolean, // 검색창 및 버튼 표시 여부
     userPlan: String // 현재 사용 중인 플랜
 });
 
-// ✅ 검색어 상태 변수
+// 검색어 상태 변수
 const searchQuery = ref(route.query.search || '');
 
-// ✅ 검색 실행 함수 (환자리스트 페이지로 이동)
+// 검색 실행 함수 (환자리스트 페이지로 이동)
 const searchPatients = async () => {
-    const query = String(searchQuery.value || '').trim(); // ✅ 문자열 변환 후 trim() 적용
+    const query = String(searchQuery.value || '').trim(); // 문자열 변환 후 trim() 적용
 
     await router.push({ path: '/patient-list', query: query ? { search: query } : {} });
 
-    // ✅ Vue의 반응형 시스템이 변경 사항을 즉시 감지하도록 `nextTick()` 사용
+    // Vue의 반응형 시스템이 변경 사항을 즉시 감지하도록 `nextTick()` 사용
     await nextTick();
 };
 
-// ✅ 병원정보 페이지로 이동하는 함수
+// 병원정보 페이지로 이동하는 함수
 const goToHospitalInfo = () => {
     router.push('/hospital-info');
 };
 
-// ✅ 환자등록 페이지로 이동하는 함수
+// 환자등록 페이지로 이동하는 함수
 const goToPatientRegistration = () => {
     router.push('/patient-registration');
 };
 
-// ✅ URL Query 변경 감지하여 `searchQuery` 업데이트
+// URL Query 변경 감지하여 `searchQuery` 업데이트
 watch(() => route.query.search, (newSearch) => {
     searchQuery.value = newSearch || '';
 });
@@ -49,7 +48,7 @@ watch(() => route.query.search, (newSearch) => {
             <img src="../assets/logo-s.png" alt="BRAINcheck Logo" class="h-8" />
             <span class="text-white text-lg font-bold ml-2">BRAINcheck</span>
 
-            <!-- ✅ 검색창 및 환자등록 버튼 -->
+            <!-- 검색창 및 환자등록 버튼 -->
             <div v-if="props.showSearch" class="flex items-center space-x-3 ml-6">
                 <!-- 검색창 -->
                 <div class="relative flex items-center w-64">
@@ -60,7 +59,7 @@ watch(() => route.query.search, (newSearch) => {
                         @click="searchPatients" />
                 </div>
 
-                <!-- ✅ 환자등록 버튼 -->
+                <!-- 환자등록 버튼 -->
                 <button @click="goToPatientRegistration"
                     class="bg-white text-blue-500 px-4 py-2 rounded-full font-semibold shadow flex items-center">
                     <FontAwesomeIcon :icon="faUserPlus" class="mr-2" /> 환자등록
@@ -68,7 +67,7 @@ watch(() => route.query.search, (newSearch) => {
             </div>
         </div>
 
-        <!-- ✅ 프로필 이미지 및 플랜 -->
+        <!-- 프로필 이미지 및 플랜 -->
         <div v-if="props.showSearch" class="relative flex items-center">
             <img src="../assets/profile.png" alt="User Profile"
                 class="w-10 h-10 rounded-full border border-white cursor-pointer"
@@ -81,5 +80,4 @@ watch(() => route.query.search, (newSearch) => {
 </template>
 
 <style scoped>
-/* 추가적인 디자인 조정이 필요한 경우 여기에 스타일 추가 */
 </style>

@@ -1,18 +1,18 @@
 <script setup lang="ts">
 import { defineProps, defineEmits } from 'vue';
 
-// ✅ props 정의: 모달 표시 여부
+// props 정의: 모달 표시 여부
 const props = defineProps<{ show: boolean }>();
 
-// ✅ emits 정의: 부모 컴포넌트로 이벤트 전달
+// emits 정의: 부모 컴포넌트로 이벤트 전달
 const emit = defineEmits(['close', 'exit']);
 
-// ✅ '계속하기' 버튼 클릭 시 모달 닫기
+// '계속하기' 버튼 클릭 시 모달 닫기
 const continueTest = () => {
     emit('close');
 };
 
-// ✅ '그만하기' 버튼 클릭 시 환자 상세페이지로 이동
+// '그만하기' 버튼 클릭 시 환자 상세페이지로 이동
 const exitToPatientDetail = () => {
     emit('exit');
 };

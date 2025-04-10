@@ -6,10 +6,10 @@ const emit = defineEmits(['close', 'confirm']);
 const testStore = useTestStore();
 const selectedTests = ref<string[]>([]);
 
-// ✅ 검사 개수 업데이트
+// 검사 개수 업데이트
 const selectedCount = computed(() => selectedTests.value.length);
 
-// ✅ 검사 선택 핸들러
+// 검사 선택 핸들러
 const toggleSelection = (testId: string) => {
     if (selectedTests.value.includes(testId)) {
         selectedTests.value = selectedTests.value.filter(id => id !== testId);
@@ -33,17 +33,17 @@ const toggleSelection = (testId: string) => {
         <div class="mx-1 my-1 bg-white rounded-lg overflow-hidden shadow-sm">
             <!-- 본문 영역 -->
             <div class="p-6">
-                <!-- ✅ 검사 개수 표시 -->
+                <!-- 검사 개수 표시 -->
                 <p class="mb-4 font-semibold">총 {{ selectedCount }}가지 검사</p>
 
-                <!-- ✅ 검사 리스트 -->
+                <!-- 검사 리스트 -->
                 <div class="grid grid-cols-2 gap-2">
                     <div v-for="test in testStore.testCategories" :key="test.id" class="flex items-center space-x-2">
-                        <!-- ✅ 체크박스 -->
+                        <!-- 체크박스 -->
                         <input type="checkbox" :id="test.id" :checked="selectedTests.includes(test.id)"
                             @change="toggleSelection(test.id)" class="mr-2 cursor-pointer">
 
-                        <!-- ✅ 검사명 (영문 ID + 한글명) -->
+                        <!-- 검사명 (영문 ID + 한글명) -->
                         <label :for="test.id" class="flex items-center space-x-2 cursor-pointer">
                             <span :class="[test.bg, test.color, 'px-2 py-1 rounded text-xs font-bold']">
                                 {{ test.id }}
