@@ -113,7 +113,7 @@ const closePage = () => {
                                 </button>
 
                                 <button v-else @click="openPlanModal(plan.name)"
-                                    class="w-full py-1 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition">
+                                    class="w-full py-1 border rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition">
                                     {{ plan.name }} 플랜변경
                                 </button>
 
