@@ -21,7 +21,7 @@ const showIdNumberError = ref(false);
 const showPhoneError = ref(false);
 const isIdFocused = ref(false);
 
-// ✅ 주민등록번호 마스킹 함수
+// 주민등록번호 마스킹 함수
 const maskIdNumber = (value: string) => {
     const parts = value.split('-');
     if (parts.length !== 2) return value;
@@ -33,7 +33,7 @@ const maskIdNumber = (value: string) => {
     return `${first}-${second[0]}${'*'.repeat(second.length - 1)}`;
 };
 
-// ✅ 주민등록번호 입력 처리
+// 주민등록번호 입력 처리
 const handleIdNumberInput = (e: Event) => {
     const target = e.target as HTMLInputElement;
     let raw = target.value.replace(/[^\d]/g, '');
@@ -48,7 +48,7 @@ const handleIdNumberInput = (e: Event) => {
     validateIdNumber();
 };
 
-// ✅ 주민등록번호 형식 검증
+// 주민등록번호 형식 검증
 const validateIdNumber = () => {
     const regex = /^\d{6}-\d{7}$/;
     const isValid = regex.test(editedPatient.value.idNumber);
@@ -56,7 +56,7 @@ const validateIdNumber = () => {
     return isValid;
 };
 
-// ✅ 연락처 형식 검증
+// 연락처 형식 검증
 const validatePhone = () => {
     const regex = /^\d{2,3}-\d{3,4}-\d{4}$/;
     const isValid = regex.test(editedPatient.value.phone);
@@ -64,7 +64,7 @@ const validatePhone = () => {
     return isValid;
 };
 
-// ✅ 폼 유효성 검사
+// 폼 유효성 검사
 const isFormValid = computed(() => {
     return editedPatient.value.name !== '' &&
         editedPatient.value.idNumber !== '' &&
@@ -74,7 +74,7 @@ const isFormValid = computed(() => {
         editedPatient.value.patientNumber !== '';
 });
 
-// ✅ props 값 반영
+// props 값 반영
 watch(() => props.patient, (newPatient) => {
     if (newPatient) {
         editedPatient.value = {
@@ -88,10 +88,10 @@ watch(() => props.patient, (newPatient) => {
     }
 }, { immediate: true });
 
-// ✅ 연락처 자동 검증
+// 연락처 자동 검증
 watch(() => editedPatient.value.phone, validatePhone);
 
-// ✅ 저장
+// 저장
 const savePatientInfo = () => {
     if (!isFormValid.value) return;
 
