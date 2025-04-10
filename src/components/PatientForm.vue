@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useAuthStore } from '../stores/authStore';
 
 const authStore = useAuthStore();
@@ -10,7 +10,6 @@ const phone = ref('');
 const patientNumber = ref('');
 const showIdNumberError = ref(false);
 const showPhoneError = ref(false);
-const displayIdNumber = ref('');
 const isFocused = ref(false);
 
 const emit = defineEmits(['submit']);
@@ -114,11 +113,6 @@ const handleSubmit = () => {
 
 // 값이 변경될 때마다 유효성 검사
 watch(phone, validatePhone);
-
-// 초기 상태 설정
-onMounted(() => {
-    displayIdNumber.value = maskIdNumber(idNumber.value);
-});
 </script>
 
 <template>
@@ -139,37 +133,37 @@ onMounted(() => {
                         class="w-full p-3 border rounded mt-1" placeholder="000000-0000000" />
                     <p v-if="showIdNumberError" class="text-orange-500 text-sm mt-1">주민번호를 정확히 입력해주세요.</p>
                 </div>
+            </div>
 
-                <div class="flex flex-col">
-                    <label class="text-gray-700 font-medium">생년월일</label>
-                    <input v-model="birthDate" type="text" class="w-full p-3 border rounded mt-1" readonly />
-                </div>
+            <div class="flex flex-col">
+                <label class="text-gray-700 font-medium">생년월일</label>
+                <input v-model="birthDate" type="text" class="w-full p-3 border rounded mt-1" readonly />
+            </div>
 
-                <div class="flex flex-col">
-                    <label class="text-gray-700 font-medium">연락처 *</label>
-                    <input v-model="phone" type="text" class="w-full p-3 border rounded mt-1"
-                        placeholder="010-0000-0000" />
-                    <p v-if="showPhoneError" class="text-orange-500 text-sm mt-1">연락처를 정확히 입력해주세요.</p>
-                </div>
+            <div class="flex flex-col">
+                <label class="text-gray-700 font-medium">연락처 *</label>
+                <input v-model="phone" type="text" class="w-full p-3 border rounded mt-1" placeholder="010-0000-0000" />
+                <p v-if="showPhoneError" class="text-orange-500 text-sm mt-1">연락처를 정확히 입력해주세요.</p>
+            </div>
 
-                <div class="flex flex-col">
-                    <label class="text-gray-700 font-medium">환자번호 *</label>
-                    <input v-model="patientNumber" type="text" class="w-full p-3 border rounded mt-1"
-                        placeholder="환자번호 입력" />
-                    <p v-if="checkDuplicatePatientId()" class="text-orange-500 text-sm mt-1">중복된 환자번호가 있습니다.</p>
-                </div>
+            <div class="flex flex-col">
+                <label class="text-gray-700 font-medium">환자번호 *</label>
+                <input v-model="patientNumber" type="text" class="w-full p-3 border rounded mt-1"
+                    placeholder="환자번호 입력" />
+                <p v-if="checkDuplicatePatientId()" class="text-orange-500 text-sm mt-1">중복된 환자번호가 있습니다.</p>
+            </div>
 
-                <div class="flex justify-center my-6">
-                    <button @click="handleSubmit" :disabled="!isFormValid" :class="[
-                        'w-32 py-3 rounded-full transition',
-                        isFormValid
-                            ? 'bg-blue-500 hover:bg-blue-600 text-white'
-                            : 'bg-blue-200 text-white cursor-not-allowed'
-                    ]">
-                        NEXT
-                    </button>
-                </div>
+            <div class="flex justify-center my-6">
+                <button @click="handleSubmit" :disabled="!isFormValid" :class="[
+                    'w-32 py-3 rounded-full transition',
+                    isFormValid
+                        ? 'bg-blue-500 hover:bg-blue-600 text-white'
+                        : 'bg-blue-200 text-white cursor-not-allowed'
+                ]">
+                    NEXT
+                </button>
             </div>
         </div>
     </div>
+
 </template>
