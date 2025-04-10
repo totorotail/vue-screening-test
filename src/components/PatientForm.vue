@@ -10,17 +10,18 @@ const phone = ref('');
 const patientNumber = ref('');
 const showIdNumberError = ref(false);
 const showPhoneError = ref(false);
+const displayIdNumber = ref('');
 
 const emit = defineEmits(['submit']);
 
-// ✅ 주민등록번호 형식 검증
+// 주민등록번호 형식 검증
 const validateIdNumber = () => {
     const regex = /^\d{6}-\d{7}$/;
     showIdNumberError.value = idNumber.value !== '' && !regex.test(idNumber.value);
     return regex.test(idNumber.value);
 };
 
-// ✅ 주민등록번호에서 생년월일 추출
+// 주민등록번호에서 생년월일 추출
 const extractBirthDate = () => {
     if (idNumber.value.length >= 6) {
         birthDate.value = `${idNumber.value.substring(0, 2)}.${idNumber.value.substring(2, 4)}.${idNumber.value.substring(4, 6)}`;
@@ -28,41 +29,55 @@ const extractBirthDate = () => {
     validateIdNumber();
 };
 
-// ✅ 주민번호 마스킹 처리
-const maskedIdNumber = computed(() => {
-    if (!idNumber.value) return '';
-    const parts = idNumber.value.split('-');
-    if (parts.length !== 2) return idNumber.value;
-    
-    const first = parts[0];
-    const second = parts[1].replace(/./g, '*');
-    return `${first}-${second}`;
-});
+// 주민번호 마스킹 처리
+const maskIdNumber = (value: string) => {
+    if (!value) return '';
+    const parts = value.split('-');
+    if (parts.length !== 2) return value;
 
-// ✅ 연락처 형식 검증
+    const first = parts[0];
+    let second = parts[1];
+
+    // 뒷 7자리 중 첫 번째 자리는 유지하고 나머지 6자리만 마스킹
+    if (second.length > 1) {
+        second = second.charAt(0) + '*'.repeat(Math.min(6, second.length - 1));
+    }
+
+    return `${first}-${second}`;
+};
+
+// 주민번호 입력 처리
+const handleIdNumberInput = (e: Event) => {
+    const target = e.target as HTMLInputElement;
+    idNumber.value = target.value;
+    displayIdNumber.value = maskIdNumber(target.value);
+    extractBirthDate();
+};
+
+// 연락처 형식 검증
 const validatePhone = () => {
     const regex = /^\d{2,3}-\d{3,4}-\d{4}$/;
     showPhoneError.value = phone.value !== '' && !regex.test(phone.value);
     return regex.test(phone.value);
 };
 
-// ✅ 환자번호 중복 확인
+// 환자번호 중복 확인
 const checkDuplicatePatientId = () => {
     return authStore.isPatientIdDuplicate(patientNumber.value);
 };
 
-// ✅ 폼 유효성 검사
+// 폼 유효성 검사
 const isFormValid = computed(() => {
-    return name.value !== '' && 
-           idNumber.value !== '' && 
-           validateIdNumber() && 
-           phone.value !== '' && 
-           validatePhone() && 
-           patientNumber.value !== '' && 
-           !checkDuplicatePatientId();
+    return name.value !== '' &&
+        idNumber.value !== '' &&
+        validateIdNumber() &&
+        phone.value !== '' &&
+        validatePhone() &&
+        patientNumber.value !== '' &&
+        !checkDuplicatePatientId();
 });
 
-// ✅ 환자 등록 버튼 클릭 시 실행
+// 환자 등록 버튼 클릭 시 실행
 const handleSubmit = () => {
     if (!isFormValid.value) return;
 
@@ -72,7 +87,7 @@ const handleSubmit = () => {
         birthDate: birthDate.value,
         idNumber: idNumber.value,
         phone: phone.value,
-        lastExam: null // ✅ 처음 등록된 환자는 최근 검사 기록 없음
+        lastExam: null // 처음 등록된 환자는 최근 검사 기록 없음
     });
 };
 
@@ -92,7 +107,8 @@ watch(phone, validatePhone);
 
             <div class="flex flex-col">
                 <label class="text-gray-700 font-medium">주민번호 *</label>
-                <input v-model="idNumber" type="text" class="w-full p-3 border rounded mt-1" placeholder="000000-0000000" @input="extractBirthDate" />
+                <input :value="displayIdNumber" @input="handleIdNumberInput" type="text"
+                    class="w-full p-3 border rounded mt-1" placeholder="000000-0000000" />
                 <p v-if="showIdNumberError" class="text-orange-500 text-sm mt-1">주민번호를 정확히 입력해주세요.</p>
             </div>
 
@@ -103,25 +119,25 @@ watch(phone, validatePhone);
 
             <div class="flex flex-col">
                 <label class="text-gray-700 font-medium">연락처 *</label>
-                <input v-model="phone" type="text" class="w-full p-3 border rounded mt-1" placeholder="010-0000-0000" @blur="validatePhone" />
+                <input v-model="phone" type="text" class="w-full p-3 border rounded mt-1" placeholder="010-0000-0000"
+                    @blur="validatePhone" />
                 <p v-if="showPhoneError" class="text-orange-500 text-sm mt-1">연락처를 정확히 입력해주세요.</p>
             </div>
 
             <div class="flex flex-col">
                 <label class="text-gray-700 font-medium">환자번호 *</label>
-                <input v-model="patientNumber" type="text" class="w-full p-3 border rounded mt-1" placeholder="환자번호 입력" />
-                <p v-if="checkDuplicatePatientId()" class="text-red-500 text-sm mt-1">중복된 환자번호가 있습니다.</p>
+                <input v-model="patientNumber" type="text" class="w-full p-3 border rounded mt-1"
+                    placeholder="환자번호 입력" />
+                <p v-if="checkDuplicatePatientId()" class="text-orange-500 text-sm mt-1">중복된 환자번호가 있습니다.</p>
             </div>
 
             <div class="flex justify-center mt-6">
-                <button @click="handleSubmit" 
-                    :disabled="!isFormValid" 
-                    :class="[
-                        'w-32 py-3 rounded-full transition',
-                        isFormValid 
-                            ? 'bg-blue-500 hover:bg-blue-600 text-white' 
-                            : 'bg-blue-200 text-white cursor-not-allowed'
-                    ]">
+                <button @click="handleSubmit" :disabled="!isFormValid" :class="[
+                    'w-32 py-3 rounded-full transition',
+                    isFormValid
+                        ? 'bg-blue-500 hover:bg-blue-600 text-white'
+                        : 'bg-blue-200 text-white cursor-not-allowed'
+                ]">
                     NEXT
                 </button>
             </div>
