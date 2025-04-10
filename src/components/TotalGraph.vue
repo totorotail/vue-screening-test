@@ -7,18 +7,18 @@ const props = defineProps<{ patient: any, selectedTest?: string, hideHeader?: bo
 
 const testStore = useTestStore();
 
-// ✅ chartData를 반응형 객체로 선언
+// chartData를 반응형 객체로 선언
 const chartData = ref<Record<string, any[]>>({});
 const chartReady = ref(false);
 
-// ✅ 날짜 포맷 함수 - 'yy.MM.dd' 형식으로 변환
+// 날짜 포맷 함수 - 'yy.MM.dd' 형식으로 변환
 const formatDate = (dateInput: string | number): string => {
     const dateString = String(dateInput);
     // 날짜 포맷이 '2024-11-31' 형식이므로 '24.11.31' 형식으로 변환
     return dateString.substring(2).replace(/-/g, '.');
 };
 
-// ✅ 날짜 레이블 위치 조정 함수
+// 날짜 레이블 위치 조정 함수
 const adjustLabelPosition = (index: number, totalLabels: number): number => {
     // 기본 위치 계산
     let position = index * 25;
@@ -36,7 +36,7 @@ const adjustLabelPosition = (index: number, totalLabels: number): number => {
     return position;
 };
 
-// ✅ 테스트에 데이터가 있는지 확인하는 함수
+// 테스트에 데이터가 있는지 확인하는 함수
 const hasData = (testId: string): boolean => {
     if (!props.patient?.examRecords) return false;
 
@@ -50,10 +50,10 @@ const hasData = (testId: string): boolean => {
     return false;
 };
 
-// ✅ 검사 데이터와 날짜 매핑 저장을 위한 변수
+// 검사 데이터와 날짜 매핑 저장을 위한 변수
 const dateMapping = ref<Record<string, string[]>>({});
 
-// ✅ 검사 데이터 변환 함수
+// 검사 데이터 변환 함수
 const getRecentExamData = (testId: string): any[] => {
     // 기본 결과 배열 - 두 번째 컬럼 이름을 Value로 설정
     const result: any[] = [['x', 'Value', { role: 'tooltip', type: 'string', p: { html: true } }]];
@@ -142,7 +142,7 @@ const getRecentExamData = (testId: string): any[] => {
     return result;
 };
 
-// ✅ 각 그래프의 날짜 레이블 생성
+// 각 그래프의 날짜 레이블 생성
 const getDateLabels = (testId: string): { text: string, index: number }[] => {
     if (!props.patient?.examRecords) return [];
 
@@ -185,7 +185,7 @@ const getDateLabels = (testId: string): { text: string, index: number }[] => {
     return result;
 };
 
-// ✅ patient.examRecords가 변경될 때 차트 업데이트
+// patient.examRecords가 변경될 때 차트 업데이트
 watch(
     () => props.patient?.examRecords,
     async () => {
@@ -204,7 +204,7 @@ watch(
     { immediate: true, deep: true }
 );
 
-// ✅ Google Charts 옵션 - 하늘색 영역 채우기 추가
+// Google Charts 옵션 - 하늘색 영역 채우기 추가
 const chartOptions = computed(() => ({
     title: '',
     curveType: 'none',
@@ -273,7 +273,7 @@ const chartOptions = computed(() => ({
     }
 }));
 
-// ✅ 안전한 차트 데이터 가져오기
+// 안전한 차트 데이터 가져오기
 const safeChartData = (graphId: string) => {
     // 기본 빈 데이터 구조
     const defaultData = [
@@ -293,7 +293,7 @@ const safeChartData = (graphId: string) => {
     return chartData.value[graphId];
 };
 
-// ✅ 선택된 검사만 필터링
+// 선택된 검사만 필터링
 const filteredGraphs = computed(() => {
     return props.selectedTest
         ? testStore.testCategories.filter(test => test.id === props.selectedTest)
@@ -304,7 +304,7 @@ const filteredGraphs = computed(() => {
 
 <template>
     <div>
-        <!-- ✅ hideHeader가 false일 때만 제목과 버튼을 표시 -->
+        <!-- hideHeader가 false일 때만 제목과 버튼을 표시 -->
         <div v-if="!hideHeader" class="flex justify-between items-center mb-2">
             <h3 class="text-lg font-bold">총 그래프</h3>
             <button class="px-3 py-1 bg-gray-300 text-sm font-semibold rounded-md">PRINT</button>
@@ -322,7 +322,7 @@ const filteredGraphs = computed(() => {
                     <p class="text-sm font-semibold">{{ graph.name }}</p>
                 </div>
 
-                <!-- ✅ 그래프 컨테이너 -->
+                <!-- 그래프 컨테이너 -->
                 <div class="relative h-[180px] w-full">
                     <!-- 차트 영역 - 데이터 있으면 차트, 없으면 "데이터 없음" 메시지 -->
                     <div v-if="hasData(graph.id)" class="absolute inset-0">

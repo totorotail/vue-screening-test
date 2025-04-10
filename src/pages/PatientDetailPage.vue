@@ -15,10 +15,10 @@ const router = useRouter();
 const authStore = useAuthStore();
 const testRecordDetailsRef = ref<InstanceType<typeof TestRecordDetails> | null>(null);
 
-// ✅ 환자 정보 가져오기
+// 환자 정보 가져오기
 const patient = ref<any>(null);
 
-// ✅ 환자 데이터 가져오는 함수
+// 환자 데이터 가져오는 함수
 const fetchPatient = () => {
     const patientId = String(route.params.id || '');
     if (authStore.user?.patients) {
@@ -28,17 +28,17 @@ const fetchPatient = () => {
     }
 };
 
-// ✅ `authStore.user`가 로드된 후 실행되도록 `watch` 사용
+// `authStore.user`가 로드된 후 실행되도록 `watch` 사용
 watch(() => authStore.user, (newUser) => {
     if (newUser) fetchPatient();
 }, { immediate: true });
 
-// ✅ 모달창 상태
+// 모달창 상태
 const showModal = ref(false);
 const showTestModal = ref(false);
 const selectedTests = ref<string[]>([]);
 
-// ✅ 검사 선택 후 처리
+// 검사 선택 후 처리
 const handleTestSelection = (tests: string[]) => {
     selectedTests.value = tests;
     showTestModal.value = false;
@@ -47,7 +47,7 @@ const handleTestSelection = (tests: string[]) => {
     }
 };
 
-// ✅ 환자 정보 업데이트 함수
+// 환자 정보 업데이트 함수
 const updatePatientInfo = (updatedPatient: any) => {
     if (!authStore.user) return;
     const index = authStore.user.patients.findIndex(p => p.patientNumber === patient.value.patientNumber);
@@ -57,19 +57,19 @@ const updatePatientInfo = (updatedPatient: any) => {
     }
 };
 
-// ✅ 검사 시작 핸들러
+// 검사 시작 핸들러
 const handleStartTest = () => {
     showTestModal.value = true;
 };
 
-// ✅ 검사 기록에서 선택한 날짜 전달
+// 검사 기록에서 선택한 날짜 전달
 const handleRecordSelection = (date: string) => {
     if (testRecordDetailsRef.value) {
         testRecordDetailsRef.value.updateSelectedDate(date);
     }
 };
 
-// ✅ 로그인 페이지로 이동
+// 로그인 페이지로 이동
 const closePage = () => {
     router.push('/');
 };
@@ -89,29 +89,29 @@ const closePage = () => {
         </div>
 
         <div class="w-[90%] max-w-[1400px] flex">
-            <!-- ✅ 왼쪽: 환자 정보 -->
+            <!-- 왼쪽: 환자 정보 -->
             <div class="w-2/5 bg-white p-6 shadow-lg rounded-lg">
                 <PatientInfo :patient="patient" @editPatient="showModal = true" />
 
                 <hr class="my-4 border-gray-300">
 
-                <!-- ✅ 총 그래프 -->
+                <!-- 총 그래프 -->
                 <TotalGraph :patient="patient" />
             </div>
 
-            <!-- ✅ 중앙: 검사 기록 -->
+            <!-- 중앙: 검사 기록 -->
             <div class="w-1/5 ml-4">
                 <TestRecords :patient="patient" @startTest="handleStartTest" @recordSelected="handleRecordSelection" />
             </div>
 
-            <!-- ✅ 오른쪽: 빈 공간 유지 -->
+            <!-- 오른쪽: 빈 공간 유지 -->
             <div class="w-2/5">
                 <TestRecordDetails ref="testRecordDetailsRef" :patient="patient" />
             </div>
         </div>
     </div>
 
-    <!-- ✅ 환자정보 수정 모달 -->
+    <!-- 환자정보 수정 모달 -->
     <EditPatientInfoModal v-if="showModal" :patient="patient" @close="showModal = false"
         @updatePatient="updatePatientInfo" />
 

@@ -17,13 +17,13 @@ const handleNext = () => {
     }
 };
 
-// ✅ 환자 등록 완료 시 실행
+// 환자 등록 완료 시 실행
 const handlePatientRegistrationComplete = (patientData: any) => {
     authStore.registerPatient(patientData);
     router.push('/patient-list'); // 환자리스트 페이지로 이동
 };
 
-// ✅ 환자 등록 페이지 닫기 기능
+// 환자 등록 페이지 닫기 기능
 const closePage = () => {
     router.push('/'); // 로그인 페이지로 이동
 };

@@ -31,10 +31,10 @@ const closePage = () => {
 
 <template>
     <div class="flex flex-col items-center min-h-screen bg-gray-50 w-full">
-        <!-- ✅ 로고 부분 (병원정보보기 페이지와 동일한 너비 유지) -->
+        <!-- 로고 부분 (병원정보보기 페이지와 동일한 너비 유지) -->
         <WideLogo class="w-[90%] max-w-[1400px] mt-4 mb-6" />
 
-        <!-- ✅ 타이틀 부분 (병원가입) -->
+        <!-- 타이틀 부분 (병원가입) -->
         <div
             class="w-[90%] max-w-[1400px] flex justify-between items-center bg-white px-6 py-3 shadow-md rounded-lg mb-2">
             <h2 class="text-lg font-semibold text-gray-800">병원가입</h2>
@@ -43,7 +43,7 @@ const closePage = () => {
             </button>
         </div>
 
-        <!-- ✅ 메인 부분 (병원정보보기 페이지와 동일한 너비 유지) -->
+        <!-- 메인 부분 (병원정보보기 페이지와 동일한 너비 유지) -->
         <div class="w-[90%] max-w-[1400px] bg-white p-6 shadow-lg rounded-lg flex flex-col items-center">
             <div v-if="!showForm" class="w-full max-w-[700px]">
                 <TermsAgreement v-model:agreed="agreed" />
