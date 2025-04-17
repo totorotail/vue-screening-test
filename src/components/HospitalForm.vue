@@ -12,7 +12,17 @@ const showEmailError = ref(false);
 const showPasswordError = ref(false);
 const termsAgreed = ref([false, false, false, false]);
 
-const hospitalLocations = ['서울', '경기도', '충청도', '전라도', '강원도', '경상도'];
+type LocationKey = 'SEOUL' | 'GYEONGGI' | 'CHUNGCHEONG' | 'JEOLLA' | 'GANGWON' | 'GYEONGSANG';
+const hospitalLocations: LocationKey[] = ['SEOUL', 'GYEONGGI', 'CHUNGCHEONG', 'JEOLLA', 'GANGWON', 'GYEONGSANG'];
+
+const locationNames: Record<LocationKey, string> = {
+  'SEOUL': '서울',
+  'GYEONGGI': '경기도',
+  'CHUNGCHEONG': '충청도',
+  'JEOLLA': '전라도',
+  'GANGWON': '강원도',
+  'GYEONGSANG': '경상도'
+};
 
 const emit = defineEmits(['submit']);
 
@@ -67,12 +77,17 @@ const handleSubmit = () => {
         return;
     }
 
-    emit('submit', {
+    // 회원가입 정보 객체 구성
+    const userData = {
         email: email.value,
         password: password.value,
         hospitalName: hospitalName.value,
         location: location.value
-    });
+    };
+
+    console.log('회원가입 요청 데이터:', userData);
+
+    emit('submit', userData);
 };
 </script>
 
@@ -111,7 +126,7 @@ const handleSubmit = () => {
                 <label class="text-xs text-gray-700 mb-1">병원위치 *</label>
                 <select v-model="location" class="w-full p-2.5 border rounded border-gray-300 bg-white">
                     <option v-for="loc in hospitalLocations" :key="loc" :value="loc">
-                        {{ loc }}
+                        {{ locationNames[loc] }}
                     </option>
                 </select>
             </div>
