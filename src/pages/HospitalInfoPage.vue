@@ -1,40 +1,73 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { useAuthStore } from '../stores/authStore';
+import HospitalService from '../services/HospitalService';
 import WideLogo from '../components/WideLogo.vue';
+import HospitalProfile from '../components/HospitalProfile.vue';
+import PlanSelector from '../components/PlanSelector.vue';
 import PlanChangeModal from '../components/PlanChangeModal.vue';
 import EditHospitalInfoModal from '../components/EditHospitalInfoModal.vue';
 
 const router = useRouter();
-const authStore = useAuthStore();
-const userInfo = computed(() => authStore.user || { email: '', hospitalName: '', location: '', plan: '' });
 
+// 병원 정보 타입 정의
+type HospitalInfoResponse = {
+    email: string;
+    hospitalName: string;
+    location: string;
+    plan: string;
+};
+
+// 병원 정보 상태 변수
+const hospitalInfo = ref<HospitalInfoResponse | null>(null);
+
+// 병원 요금제 옵션
 const availablePlans = [
     { name: 'STARTER', price: '0원 / 월', benefits: ['✔️ 베네핏내용1'] },
     { name: 'BASIC', price: '12,000원 / 월', benefits: ['✔️ 베네핏내용1', '✔️ 베네핏내용2'] },
     { name: 'PREMIUM', price: '20,000원 / 월', benefits: ['✔️ 베네핏내용1', '✔️ 베네핏내용2', '✔️ 베네핏내용3'] }
 ];
 
-// 상태 변수
+// 모달 상태 변수
 const showPlanModal = ref(false);
 const selectedPlan = ref('');
 const showEditModal = ref(false);
 
+// 병원 정보 불러오기
+const fetchHospitalInfo = async () => {
+    try {
+        const response = await HospitalService.getMyInfo();
+        hospitalInfo.value = response.data;
+    } catch (error) {
+        console.error('병원 정보 불러오기 실패:', error);
+        router.push('/');
+    }
+};
+
+onMounted(() => {
+    fetchHospitalInfo();
+});
+
 // 플랜 변경 확인 모달 띄우기
 const openPlanModal = (plan: string) => {
-    selectedPlan.value = plan; // 선택한 플랜 저장
+    selectedPlan.value = plan;
     if (plan === 'STARTER') {
         showPlanModal.value = true;
     } else {
-        changePlan(); // STARTER가 아니면 즉시 변경 실행
+        changePlan(); // STARTER가 아닌 경우 즉시 변경
     }
 };
 
 // 플랜 변경 실행
-const changePlan = () => {
-    authStore.user!.plan = selectedPlan.value;
-    showPlanModal.value = false;
+const changePlan = async () => {
+    if (!selectedPlan.value) return;
+    try {
+        await HospitalService.updatePlan({ plan: selectedPlan.value });
+        await fetchHospitalInfo();
+        showPlanModal.value = false;
+    } catch (error) {
+        console.error('플랜 변경 실패:', error);
+    }
 };
 
 // 병원 정보 수정 모달 열기
@@ -42,23 +75,33 @@ const openEditModal = () => {
     showEditModal.value = true;
 };
 
-// 병원 정보 업데이트
-const updateHospitalInfo = (data: { hospitalName: string, location: string }) => {
-    authStore.user!.hospitalName = data.hospitalName;
-    authStore.user!.location = data.location;
-    showEditModal.value = false;
+// 병원 정보 업데이트 (비밀번호 포함 가능)
+const updateHospitalInfo = async (data: { hospitalName: string; location: string; password?: string }) => {
+    try {
+        await HospitalService.updateInfo({
+            password: data.password || '',
+            hospitalName: data.hospitalName,
+            location: data.location
+        });
+        await fetchHospitalInfo();
+        showEditModal.value = false;
+    } catch (error) {
+        console.error('병원 정보 업데이트 실패:', error);
+    }
 };
 
 // 페이지 닫기
 const closePage = () => {
-    router.push('/'); // 로그인 페이지로 이동
+    router.push('/');
 };
 </script>
 
 <template>
-    <div class="min-h-screen bg-gray-100 flex flex-col items-center relative">
-        <WideLogo class="w-[90%] max-w-[1400px] mt-4 mb-6" :showSearch="true" :userPlan="userInfo.plan" />
+    <div class="min-h-screen bg-gray-100 flex flex-col items-center relative" v-if="hospitalInfo">
+        <!-- 상단 로고 -->
+        <WideLogo class="w-[90%] max-w-[1400px] mt-4 mb-6" :showSearch="true" :userPlan="hospitalInfo.plan" />
 
+        <!-- 헤더 타이틀 -->
         <div
             class="w-[90%] max-w-[1400px] flex justify-between items-center bg-white px-6 py-3 shadow-md rounded-lg mb-2">
             <h2 class="text-xl font-semibold text-gray-800">병원정보</h2>
@@ -67,72 +110,22 @@ const closePage = () => {
             </button>
         </div>
 
+        <!-- 병원 정보 & 플랜 변경 -->
         <div class="w-[90%] max-w-[1400px] flex space-x-4">
-            <!-- 병원 정보 -->
-            <div class="w-1/3 bg-white shadow-lg rounded-lg p-6">
-                <div class="grid grid-cols-[80px_1fr] gap-1">
-                    <div class="font-semibold">이메일</div>
-                    <div>{{ userInfo.email }}</div>
-                    <div class="font-semibold">병원이름</div>
-                    <div>{{ userInfo.hospitalName }}</div>
-                    <div class="font-semibold">지역</div>
-                    <div>{{ userInfo.location }}</div>
-                    <div class="font-semibold">플랜</div>
-                    <div>{{ userInfo.plan }}</div>
-                </div>
-                <div class="mt-4">
-                    <button @click="openEditModal">
-                        <img src="src/assets/setting-icon.png" class="w-6 h-6" alt="설정" />
-                    </button>
-                </div>
-            </div>
+            <!-- 병원 프로필 카드 -->
+            <HospitalProfile :email="hospitalInfo.email" :hospitalName="hospitalInfo.hospitalName"
+                :location="hospitalInfo.location" :plan="hospitalInfo.plan" @open-edit="openEditModal" />
 
-            <!-- 플랜 변경 -->
-            <div class="w-2/3 bg-white shadow-lg rounded-lg p-6">
-                <h2 class="text-lg font-bold mb-4">플랜변경</h2>
-                <div class="border-b border-gray-200 mb-4 mt-1"></div>
-                <div class="w-[80%] mx-auto">
-                    <div class="flex space-x-4">
-                        <div v-for="plan in availablePlans" :key="plan.name"
-                            class="flex-1 border rounded-lg overflow-hidden">
-                            <!-- 상단 컬러 바 -->
-                            <div :class="[
-                                plan.name === 'STARTER' ? 'bg-gray-100' :
-                                    plan.name === 'BASIC' ? 'bg-blue-500' :
-                                        'bg-black',
-                                'h-2'
-                            ]"></div>
-                            <!-- 카드 내용 -->
-                            <div class="text-center px-3 py-10">
-                                <h3 class="mb-2">{{ plan.name }}</h3>
-                                <p class="font-bold mb-4">{{ plan.price }}</p>
-
-                                <button v-if="userInfo.plan === plan.name"
-                                    class="w-full py-1 border rounded-lg cursor-not-allowed">
-                                    {{ plan.name }} 플랜중
-                                </button>
-
-                                <button v-else @click="openPlanModal(plan.name)"
-                                    class="w-full py-1 border rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition">
-                                    {{ plan.name }} 플랜변경
-                                </button>
-
-                                <div class="mt-4 text-left">
-                                    <p v-for="benefit in plan.benefits" :key="benefit" class="text-sm flex items-start">
-                                        <span class="text-green-600 mr-1 mb-1">✓</span>
-                                        {{ benefit.replace('✔️ ', '') }}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- 플랜 선택 카드 -->
+            <PlanSelector :currentPlan="hospitalInfo.plan" :availablePlans="availablePlans" @select="openPlanModal" />
         </div>
 
+        <!-- 플랜 변경 확인 모달 -->
         <PlanChangeModal :show="showPlanModal" :selectedPlan="selectedPlan" @confirm="changePlan"
             @close="showPlanModal = false" />
-        <EditHospitalInfoModal :show="showEditModal" :hospitalName="userInfo.hospitalName" :location="userInfo.location"
-            @update="updateHospitalInfo" @close="showEditModal = false" />
+
+        <!-- 병원 정보 수정 모달 -->
+        <EditHospitalInfoModal :show="showEditModal" :hospitalName="hospitalInfo.hospitalName"
+            :location="hospitalInfo.location" @update="updateHospitalInfo" @close="showEditModal = false" />
     </div>
 </template>
