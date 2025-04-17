@@ -1,5 +1,12 @@
 import apiClient from './api';
 
+interface HospitalInfoResponse {
+    email: string;
+    hospitalName: string;
+    location: string; // e.g., "GYEONGGI"
+    plan: string;     // e.g., "STARTER"
+}
+
 interface RegistrationRequest {
     email: string;
     password: string;
@@ -23,6 +30,11 @@ interface PlanUpdateRequest {
 }
 
 const HospitalService = {
+    // 병원 정보 조회 (로그인된 사용자 기준)
+    getMyInfo() {
+        return apiClient.get<HospitalInfoResponse>('/hospital');
+    },
+
     // 병원 회원가입
     register(data: RegistrationRequest) {
         return apiClient.post('/hospital/register', data);
