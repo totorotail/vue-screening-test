@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useAuthStore } from '../stores/authStore';
 import TermsAgreement from '../components/TermsAgreement.vue';
 import HospitalForm from '../components/HospitalForm.vue';
 import WideLogo from '../components/WideLogo.vue';
+import HospitalService from '../services/HospitalService';
 
 const router = useRouter();
-const authStore = useAuthStore();
 const agreed = ref(false);
 const showForm = ref(false);
+const loading = ref(false);
+const error = ref('');
 
 const handleNext = () => {
     if (agreed.value) {
@@ -18,9 +19,22 @@ const handleNext = () => {
 };
 
 // 회원가입 후 환자리스트 페이지로 이동
-const handleSignUpComplete = (userData: { email: string; password: string; hospitalName: string; location: string }) => {
-    authStore.register(userData.email, userData.password, userData.hospitalName, userData.location);
-    router.push('/patient-list');
+const handleSignUpComplete = async (userData: { email: string; password: string; hospitalName: string; location: string }) => {
+    loading.value = true;
+    error.value = '';
+    
+    try {
+        // 회원가입 API 호출
+        await HospitalService.register(userData);
+        
+        // 회원가입 성공 메시지 표시 및 로그인 페이지로 이동
+        alert('회원가입이 완료되었습니다. 로그인해주세요.');
+        router.push('/');
+    } catch (err: any) {
+        error.value = err.response?.data?.message || '회원가입 중 오류가 발생했습니다.';
+    } finally {
+        loading.value = false;
+    }
 };
 
 // 회원가입(병원가입) 페이지 닫기 기능
@@ -62,4 +76,7 @@ const closePage = () => {
             <HospitalForm v-if="showForm" class="w-full" @submit="handleSignUpComplete" />
         </div>
     </div>
+
+    <div v-if="error" class="text-red-500 text-center mt-4">{{ error }}</div>
+    <div v-if="loading" class="text-center mt-4">처리 중...</div>
 </template>

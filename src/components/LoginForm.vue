@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { useAuthStore } from '../stores/authStore';
+import AuthService from '../services/AuthService';
 
 const router = useRouter();
-const authStore = useAuthStore();
 
 const email = ref('');
 const password = ref('');
 const showEmailError = ref(false);
 const showPasswordError = ref(false);
+const loading = ref(false);
 
 const validateEmail = (email: string) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -21,22 +21,28 @@ const isFormValid = computed(() => {
     return validateEmail(email.value) && password.value.length > 0;
 });
 
-const handleNext = () => {
+const handleNext = async () => {
     // 이메일 유효성 검사
     showEmailError.value = !validateEmail(email.value);
-    
+
     // 비밀번호 검증
     if (password.value.length === 0) {
         showPasswordError.value = true;
         return;
     }
-    
+
     if (isFormValid.value) {
-        // 기존 로그인 로직 유지
-        if (!authStore.login(email.value, password.value)) {
-            showPasswordError.value = true;
-        } else {
+        loading.value = true;
+
+        try {
+            // AuthService를 사용하여 로그인 (트라이-캐치로 에러 처리)
+            await AuthService.login({ email: email.value, password: password.value });
             router.push('/patient-list'); // 로그인 성공 후 환자리스트 페이지로 이동
+        } catch (error) {
+            console.error('로그인 오류:', error);
+            showPasswordError.value = true;
+        } finally {
+            loading.value = false;
         }
     }
 };
@@ -46,15 +52,15 @@ const handleNext = () => {
     <div>
         <div class="mb-6">
             <label class="block text-gray-700 text-xs mb-1">이메일</label>
-            <input v-model="email" type="email" placeholder="Example@example.com" 
-                   class="w-full p-3 border rounded border-gray-300 bg-gray-50 mt-1" />
+            <input v-model="email" type="email" placeholder="Example@example.com"
+                class="w-full p-3 border rounded border-gray-300 bg-gray-50 mt-1" />
             <p v-if="showEmailError" class="text-orange-500 text-xs mt-1">이메일을 정확히 입력해주세요.</p>
         </div>
 
         <div class="mb-2">
             <label class="block text-gray-700 text-xs mb-1">비밀번호</label>
-            <input v-model="password" type="password" placeholder="영문 소문자, 대문자, 숫자 8자리 이상" 
-                   class="w-full p-3 border rounded border-gray-300 bg-gray-50 mt-1" />
+            <input v-model="password" type="password" placeholder="영문 소문자, 대문자, 숫자 8자리 이상"
+                class="w-full p-3 border rounded border-gray-300 bg-gray-50 mt-1" />
             <p v-if="showPasswordError" class="text-orange-500 text-xs mt-1">비밀번호가 맞지 않습니다.</p>
         </div>
 
@@ -67,14 +73,12 @@ const handleNext = () => {
                 class="w-[120px] bg-white hover:bg-gray-100 text-black py-2.5 rounded-full font-bold text-sm border border-black-300">
                 SIGN UP
             </button>
-            <button @click="handleNext"
-                :disabled="!isFormValid"
-                :class="[
-                    'w-[120px] py-2.5 rounded-full font-bold text-sm',
-                    isFormValid 
-                        ? 'bg-blue-100 hover:bg-blue-200 text-blue-600 cursor-pointer' 
-                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                ]">
+            <button @click="handleNext" :disabled="!isFormValid" :class="[
+                'w-[120px] py-2.5 rounded-full font-bold text-sm',
+                isFormValid
+                    ? 'bg-blue-100 hover:bg-blue-200 text-blue-600 cursor-pointer'
+                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            ]">
                 NEXT
             </button>
         </div>
