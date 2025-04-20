@@ -3,12 +3,13 @@ import { defineProps, defineEmits } from 'vue';
 
 // 타입 정의
 interface Patient {
-    patientNumber: string;
+    id: number;
     name: string;
-    birthDate: string;
-    idNumber: string;
-    phone: string;
-    lastExam: string | null;
+    residentRegistrationNumber: string;
+    phoneNumber: string;
+    patientNumber: string;
+    lastExam?: string | null;
+    birthDate?: string;
 }
 
 // props 정의
@@ -19,7 +20,7 @@ const props = defineProps<{
     searchQuery: string;
     currentPage: number;
     itemsPerPage: number;
-    getGender: (idNumber: string) => string;
+    getGender: (rrn: string) => string;
     getDaysAgo: (examDate: string | null) => string;
 }>();
 
@@ -34,7 +35,9 @@ const emit = defineEmits<{
     <!-- 검색 전 환자가 없는 경우 -->
     <div v-if="props.patients.length === 0 && !props.searchQuery"
         class="w-[90%] max-w-[1400px] bg-white p-8 shadow-lg rounded-lg flex flex-col items-center">
-        <p class="text-gray-600 text-lg font-semibold">등록된 환자가 없습니다.<br>환자를 등록해주세요.</p>
+        <p class="text-gray-600 text-lg font-semibold">
+            등록된 환자가 없습니다.<br />환자를 등록해주세요.
+        </p>
         <img src="../assets/no-patient.png" alt="No Patients" class="w-64 mt-4" />
         <button @click="emit('register')"
             class="mt-4 px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg shadow hover:bg-blue-600 transition">
@@ -46,7 +49,7 @@ const emit = defineEmits<{
     <div v-else-if="props.filteredPatients.length === 0 && props.searchQuery"
         class="w-[90%] max-w-[1400px] bg-white p-8 shadow-lg rounded-lg flex flex-col items-center">
         <p class="text-gray-600 text-lg font-semibold">
-            '{{ props.searchQuery }}'이 없습니다.
+            '{{ props.searchQuery }}'에 대한 검색 결과가 없습니다.
         </p>
         <button @click="emit('register')"
             class="mt-4 px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg shadow hover:bg-blue-600 transition">
@@ -62,9 +65,9 @@ const emit = defineEmits<{
                     <th class="p-3">NO</th>
                     <th class="p-3">환자명</th>
                     <th class="p-3">환자번호</th>
-                    <th class="p-3">생년월일</th>
+                    <th class="p-3">주민번호</th>
                     <th class="p-3">성별</th>
-                    <th class="p-3">번호</th>
+                    <th class="p-3">연락처</th>
                     <th class="p-3">최근검사</th>
                 </tr>
             </thead>
@@ -75,10 +78,10 @@ const emit = defineEmits<{
                     <td class="p-3">{{ (props.currentPage - 1) * props.itemsPerPage + index + 1 }}</td>
                     <td class="p-3">{{ patient.name }}</td>
                     <td class="p-3">{{ patient.patientNumber }}</td>
-                    <td class="p-3">{{ patient.birthDate }}</td>
-                    <td class="p-3">{{ props.getGender(patient.idNumber) }}</td>
-                    <td class="p-3">{{ patient.phone }}</td>
-                    <td class="p-3">{{ props.getDaysAgo(patient.lastExam) }}</td>
+                    <td class="p-3">{{ patient.residentRegistrationNumber }}</td>
+                    <td class="p-3">{{ props.getGender(patient.residentRegistrationNumber) }}</td>
+                    <td class="p-3">{{ patient.phoneNumber }}</td>
+                    <td class="p-3">{{ props.getDaysAgo(patient.lastExam || null) }}</td>
                 </tr>
             </tbody>
         </table>
