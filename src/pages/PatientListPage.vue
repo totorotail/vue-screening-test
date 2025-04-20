@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import WideLogo from '../components/WideLogo.vue';
 import PatientListContent from '../components/PatientListContent.vue';
@@ -34,33 +34,42 @@ const fetchHospitalInfo = async () => {
   }
 };
 
-// 환자 목록 불러오기
+// 환자 정보 가져오기
 const fetchPatients = async () => {
+  const query = searchQuery.value.trim();
   try {
-    const response = await PatientService.getAllPatients(0, 1000);
-    allPatients.value = response.data.content;
-  } catch (error) {
-    console.error('환자 목록 불러오기 실패:', error);
+    if (query) {
+      const res = await PatientService.searchPatientsByName(query, 0, 1000);
+      allPatients.value = res.data.content;
+    } else {
+      const res = await PatientService.getAllPatients(0, 1000);
+      allPatients.value = res.data.content;
+    }
+  } catch (err) {
+    console.error('환자 목록 실패:', err);
   }
 };
 
+// 검색 실행
+const searchPatients = async () => {
+  const query = searchQuery.value.trim();
+  currentPage.value = 1;
+  await router.replace({ path: '/patient-list', query: query ? { search: query } : {} });
+  await fetchPatients();
+  await nextTick();
+};
+
+// 초기 실행
 onMounted(async () => {
   await fetchHospitalInfo();
   await fetchPatients();
 });
 
-// 필터링된 환자 목록
-const filteredPatients = computed(() => {
-  const query = searchQuery.value.trim();
-  if (!query) return allPatients.value;
-  return allPatients.value.filter(patient => patient.name.includes(query));
-});
-
 // 페이지 계산
-const totalPages = computed(() => Math.ceil(filteredPatients.value.length / itemsPerPage));
+const totalPages = computed(() => Math.ceil(allPatients.value.length / itemsPerPage));
 const paginatedPatients = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage;
-  return filteredPatients.value.slice(start, start + itemsPerPage);
+  return allPatients.value.slice(start, start + itemsPerPage);
 });
 
 // 성별 계산 함수
@@ -70,39 +79,29 @@ const getGender = (idNumber: string) => {
 };
 
 // 최근 검사일 계산 함수
-const getDaysAgo = (examDate: string | null) => {
-  if (!examDate) return '없음';
-  const examTime = new Date(examDate).getTime();
-  const todayTime = new Date().getTime();
-  const diffTime = todayTime - examTime;
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-  return diffDays > 0 ? `${diffDays}일전` : '오늘';
+const getDaysAgo = (date: string | null) => {
+  if (!date) return '없음';
+  const diff = Date.now() - new Date(date).getTime();
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  return days > 0 ? `${days}일전` : '오늘';
 };
 
 // 환자 상세 이동
-const goToPatientDetail = (patientNumber: string) => {
-  router.push(`/patient-detail/${patientNumber}`);
-};
-
-// 환자 등록 이동
-const goToPatientRegistration = () => {
-  router.push('/patient-registration');
-};
-
-// 닫기 버튼
-const closePage = () => {
-  router.push('/');
-};
+const goToPatientDetail = (patientNumber: string) => router.push(`/patient-detail/${patientNumber}`);
+const goToPatientRegistration = () => router.push('/patient-registration');
+const closePage = () => router.push('/');
 
 // URL 쿼리 변화 감지
-watch(() => route.query.search, (newQuery) => {
-  searchQuery.value = String(newQuery || '');
+watch(() => route.query.search, async (newVal) => {
+  searchQuery.value = String(newVal || '');
+  await fetchPatients();
 });
 </script>
 
 <template>
   <div class="flex flex-col items-center min-h-screen bg-gray-50 w-full" v-if="hospitalInfo">
-    <WideLogo class="w-[90%] max-w-[1400px] mt-4 mb-6" :showSearch="true" :userPlan="hospitalInfo.plan"/>
+    <WideLogo class="w-[90%] max-w-[1400px] mt-4 mb-6" :showSearch="true" :userPlan="hospitalInfo.plan"
+      v-model:searchQuery="searchQuery" @search="searchPatients" />
 
     <div class="w-[90%] max-w-[1400px] flex justify-between items-center bg-white px-6 py-3 shadow-md rounded-lg mb-2">
       <h2 class="text-xl font-semibold text-gray-800">환자리스트</h2>
@@ -111,13 +110,12 @@ watch(() => route.query.search, (newQuery) => {
       </button>
     </div>
 
-    <PatientListContent :patients="allPatients" :filteredPatients="filteredPatients"
-      :paginatedPatients="paginatedPatients" :searchQuery="searchQuery" :currentPage="currentPage"
-      :itemsPerPage="itemsPerPage" :getGender="getGender" :getDaysAgo="getDaysAgo" @register="goToPatientRegistration"
-      @select="goToPatientDetail" />
+    <PatientListContent :patients="allPatients" :filteredPatients="allPatients" :paginatedPatients="paginatedPatients"
+      :searchQuery="searchQuery" :currentPage="currentPage" :itemsPerPage="itemsPerPage" :getGender="getGender"
+      :getDaysAgo="getDaysAgo" @register="goToPatientRegistration" @select="goToPatientDetail" />
 
     <!-- 페이지네이션 -->
-    <div v-if="filteredPatients.length > 0" class="flex justify-center mt-6 space-x-2">
+    <div v-if="allPatients.length > 0" class="flex justify-center mt-6 space-x-2">
       <button @click="currentPage > 1 && (currentPage--)" :disabled="currentPage === 1"
         class="px-3 py-2 border rounded disabled:opacity-50">&lt;</button>
       <button v-for="page in totalPages" :key="page" @click="currentPage = page" class="px-4 py-2 border rounded"
