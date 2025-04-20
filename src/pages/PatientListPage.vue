@@ -87,7 +87,7 @@ const getDaysAgo = (date: string | null) => {
 };
 
 // 환자 상세 이동
-const goToPatientDetail = (patientNumber: string) => router.push(`/patient-detail/${patientNumber}`);
+const goToPatientDetail = (id: number) => router.push(`/patient-detail/${id}`);
 const goToPatientRegistration = () => router.push('/patient-registration');
 const closePage = () => router.push('/');
 

@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useAuthStore } from '../stores/authStore';
 import WideLogo from '../components/WideLogo.vue';
 import PatientInfo from '../components/PatientInfo.vue';
 import TotalGraph from '../components/TotalGraph.vue';
@@ -9,52 +8,60 @@ import TestRecords from '../components/TestRecords.vue';
 import TestRecordDetails from '../components/TestRecordDetails.vue';
 import EditPatientInfoModal from '../components/EditPatientInfoModal.vue';
 import SelectTestModal from '../components/SelectTestModal.vue';
+import HospitalService from '../services/HospitalService';
+import PatientService from '../services/PatientService';
 
 const route = useRoute();
 const router = useRouter();
-const authStore = useAuthStore();
 const testRecordDetailsRef = ref<InstanceType<typeof TestRecordDetails> | null>(null);
 
-// 환자 정보 가져오기
 const patient = ref<any>(null);
-
-// 환자 데이터 가져오는 함수
-const fetchPatient = () => {
-    const patientId = String(route.params.id || '');
-    if (authStore.user?.patients) {
-        const foundPatient = authStore.user.patients.find(p => String(p.patientNumber) === patientId);
-        console.log("🔍 찾은 환자 정보:", foundPatient);
-        patient.value = foundPatient || null;
-    }
-};
-
-// `authStore.user`가 로드된 후 실행되도록 `watch` 사용
-watch(() => authStore.user, (newUser) => {
-    if (newUser) fetchPatient();
-}, { immediate: true });
-
-// 모달창 상태
+const hospitalInfo = ref<{ plan: string } | null>(null);
 const showModal = ref(false);
 const showTestModal = ref(false);
 const selectedTests = ref<string[]>([]);
+
+// 병원 정보 불러오기
+const fetchHospitalInfo = async () => {
+    try {
+        const response = await HospitalService.getMyInfo();
+        hospitalInfo.value = response.data;
+    } catch (error) {
+        console.error('병원 정보 불러오기 실패:', error);
+        router.push('/');
+    }
+};
+
+// 환자 정보 불러오기
+const fetchPatient = async () => {
+    try {
+        const patientId = Number(route.params.id);
+        const response = await PatientService.getPatientById(patientId);
+        patient.value = response.data;
+    } catch (error) {
+        console.error('환자 정보 조회 실패:', error);
+        router.push('/');
+    }
+};
+
+// 페이지 로드 시 데이터 가져오기
+onMounted(() => {
+    fetchHospitalInfo();
+    fetchPatient();
+});
 
 // 검사 선택 후 처리
 const handleTestSelection = (tests: string[]) => {
     selectedTests.value = tests;
     showTestModal.value = false;
     if (tests.length > 0) {
-        router.push({ name: 'TestPage', query: { patientId: patient.value.patientNumber, tests: tests.join(',') } });
+        router.push({ name: 'TestPage', query: { patientId: patient.value.id, tests: tests.join(',') } });
     }
 };
 
-// 환자 정보 업데이트 함수
-const updatePatientInfo = (updatedPatient: any) => {
-    if (!authStore.user) return;
-    const index = authStore.user.patients.findIndex(p => p.patientNumber === patient.value.patientNumber);
-    if (index !== -1) {
-        authStore.user.patients[index] = updatedPatient;
-        patient.value = updatedPatient; // 화면 갱신
-    }
+// 환자 정보 수정 후 반영
+const updatePatientInfo = (updated: any) => {
+    patient.value = updated;
 };
 
 // 검사 시작 핸들러
@@ -77,8 +84,8 @@ const closePage = () => {
 </script>
 
 <template>
-    <div class="flex flex-col items-center min-h-screen bg-gray-50 w-full">
-        <WideLogo class="w-[90%] max-w-[1400px] mt-4 mb-6" :showSearch="true" :userPlan="authStore.user?.plan || ''" />
+    <div class="flex flex-col items-center min-h-screen bg-gray-50 w-full" v-if="patient && hospitalInfo">
+        <WideLogo class="w-[90%] max-w-[1400px] mt-4 mb-6" :showSearch="true" :userPlan="hospitalInfo.plan" />
 
         <div
             class="w-[90%] max-w-[1400px] flex justify-between items-center bg-white px-6 py-3 shadow-md rounded-lg mb-2">
