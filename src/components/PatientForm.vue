@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
-import { useAuthStore } from '../stores/authStore';
+import PatientService from '../services/PatientService';
 
-const authStore = useAuthStore();
 const name = ref('');
 const idNumber = ref('');
 const birthDate = ref('');
@@ -11,6 +10,7 @@ const patientNumber = ref('');
 const showIdNumberError = ref(false);
 const showPhoneError = ref(false);
 const isFocused = ref(false);
+const duplicateError = ref('');
 
 const emit = defineEmits(['submit']);
 
@@ -81,11 +81,6 @@ const validatePhone = () => {
     return isValid;
 };
 
-// 환자번호 중복 확인
-const checkDuplicatePatientId = () => {
-    return patientNumber.value !== '' && authStore.isPatientIdDuplicate(patientNumber.value);
-};
-
 // 폼 유효성 검사
 const isFormValid = computed(() => {
     return name.value !== '' &&
@@ -93,22 +88,23 @@ const isFormValid = computed(() => {
         validateIdNumber() &&
         phone.value !== '' &&
         validatePhone() &&
-        patientNumber.value !== '' &&
-        !checkDuplicatePatientId();
+        patientNumber.value !== '';
 });
 
 // 환자 등록 버튼 클릭 시 실행
-const handleSubmit = () => {
+const handleSubmit = async () => {
     if (!isFormValid.value) return;
-
-    emit('submit', {
-        name: name.value,
-        patientNumber: patientNumber.value,
-        birthDate: birthDate.value,
-        idNumber: idNumber.value, // 원본 값 전달
-        phone: phone.value,
-        lastExam: null // 처음 등록된 환자는 최근 검사 기록 없음
-    });
+    try {
+        await PatientService.registerPatient({
+            name: name.value,
+            residentRegistrationNumber: idNumber.value,
+            phoneNumber: phone.value,
+            patientNumber: patientNumber.value
+        });
+        emit('submit');
+    } catch (error: any) {
+        duplicateError.value = error?.response?.data?.message || '등록 중 오류가 발생했습니다';
+    }
 };
 
 // 값이 변경될 때마다 유효성 검사
@@ -150,7 +146,6 @@ watch(phone, validatePhone);
                 <label class="text-gray-700 font-medium">환자번호 *</label>
                 <input v-model="patientNumber" type="text" class="w-full p-3 border rounded mt-1"
                     placeholder="환자번호 입력" />
-                <p v-if="checkDuplicatePatientId()" class="text-orange-500 text-sm mt-1">중복된 환자번호가 있습니다.</p>
             </div>
 
             <div class="flex justify-center my-6">
