@@ -101,6 +101,7 @@ const handleSubmit = async () => {
             phoneNumber: phone.value,
             patientNumber: patientNumber.value
         });
+        duplicateError.value = '';
         emit('submit');
     } catch (error: any) {
         duplicateError.value = error?.response?.data?.message || '등록 중 오류가 발생했습니다';
@@ -146,6 +147,7 @@ watch(phone, validatePhone);
                 <label class="text-gray-700 font-medium">환자번호 *</label>
                 <input v-model="patientNumber" type="text" class="w-full p-3 border rounded mt-1"
                     placeholder="환자번호 입력" />
+                <p v-if="duplicateError" class="text-orange-500 text-sm mt-1">중복된 환자번호가 있습니다.</p>
             </div>
 
             <div class="flex justify-center my-6">
