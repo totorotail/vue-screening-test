@@ -27,7 +27,7 @@ const props = defineProps<{
 // 이벤트 정의
 const emit = defineEmits<{
     (e: 'register'): void;
-    (e: 'select', patientNumber: string): void;
+    (e: 'select', patientId: number): void;
 }>();
 </script>
 
@@ -74,7 +74,7 @@ const emit = defineEmits<{
             <tbody>
                 <tr v-for="(patient, index) in props.paginatedPatients" :key="patient.patientNumber"
                     class="border-b border-gray-200 cursor-pointer hover:bg-gray-100"
-                    @click="emit('select', patient.patientNumber)">
+                    @click="emit('select', patient.id)">
                     <td class="p-3">{{ (props.currentPage - 1) * props.itemsPerPage + index + 1 }}</td>
                     <td class="p-3">{{ patient.name }}</td>
                     <td class="p-3">{{ patient.patientNumber }}</td>
