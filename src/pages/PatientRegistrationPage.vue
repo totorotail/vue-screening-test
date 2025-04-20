@@ -1,16 +1,15 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useAuthStore } from '../stores/authStore';
 import TermsAgreement from '../components/TermsAgreement.vue';
 import PatientForm from '../components/PatientForm.vue';
 import WideLogo from '../components/WideLogo.vue';
 
 const router = useRouter();
-const authStore = useAuthStore();
 const agreed = ref(false);
 const showForm = ref(false);
 
+// 개인정보 동의
 const handleNext = () => {
     if (agreed.value) {
         showForm.value = true;
@@ -18,8 +17,7 @@ const handleNext = () => {
 };
 
 // 환자 등록 완료 시 실행
-const handlePatientRegistrationComplete = (patientData: any) => {
-    authStore.registerPatient(patientData);
+const handlePatientRegistrationComplete = () => {
     router.push('/patient-list'); // 환자리스트 페이지로 이동
 };
 
