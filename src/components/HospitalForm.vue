@@ -85,8 +85,6 @@ const handleSubmit = () => {
         location: location.value
     };
 
-    console.log('회원가입 요청 데이터:', userData);
-
     emit('submit', userData);
 };
 </script>
