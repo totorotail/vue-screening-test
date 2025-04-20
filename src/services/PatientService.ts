@@ -14,6 +14,11 @@ interface PatientUpdateRequest {
     patientNumber: string;
 }
 
+export interface PatientDuplicateCheckRequest {
+    patientNumber: string;
+    excludePatientId?: number; // 환자 수정 시 본인 ID를 제외
+}
+
 const PatientService = {
     // 환자 등록
     registerPatient(data: PatientCreateRequest) {
@@ -38,6 +43,11 @@ const PatientService = {
     // 환자 정보 업데이트
     updatePatient(id: number, data: PatientUpdateRequest) {
         return apiClient.put(`/patient/${id}`, data);
+    },
+
+    // 환자번호 중복 여부 확인
+    checkDuplicatePatientNumber(data: PatientDuplicateCheckRequest) {
+        return apiClient.post('/patient/check-duplicate', data);
     }
 };
 
