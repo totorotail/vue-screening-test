@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { ref, defineProps, defineEmits, watch, computed } from 'vue';
-import { useAuthStore } from '../stores/authStore';
-
-const authStore = useAuthStore();
+import PatientService from '../services/PatientService';
 
 const props = defineProps({
     patient: Object,
+    serverError: { // 새로운 prop 추가
+        type: String,
+        default: ''
+    }
 });
 
-const emit = defineEmits(['close', 'update']);
+const emit = defineEmits(['close', 'updatePatient']);
 
 const editedPatient = ref({
     name: '',
@@ -20,6 +22,7 @@ const editedPatient = ref({
 const showIdNumberError = ref(false);
 const showPhoneError = ref(false);
 const isIdFocused = ref(false);
+const duplicateError = ref('');
 
 // 주민등록번호 마스킹 함수
 const maskIdNumber = (value: string) => {
@@ -37,8 +40,8 @@ const maskIdNumber = (value: string) => {
 const handleIdNumberInput = (e: Event) => {
     const target = e.target as HTMLInputElement;
     let raw = target.value.replace(/[^\d]/g, '');
-    if (raw.length > 13) raw = raw.slice(0, 13);
 
+    if (raw.length > 13) raw = raw.slice(0, 13);
     if (raw.length > 6) {
         editedPatient.value.idNumber = `${raw.slice(0, 6)}-${raw.slice(6)}`;
     } else {
@@ -64,29 +67,58 @@ const validatePhone = () => {
     return isValid;
 };
 
+// 서버 에러 감시
+watch(() => props.serverError, (newError) => {
+    if (newError) {
+        duplicateError.value = newError;
+    }
+}, { immediate: true });
+
 // 폼 유효성 검사
 const isFormValid = computed(() => {
     return editedPatient.value.name !== '' &&
-        editedPatient.value.idNumber !== '' &&
         validateIdNumber() &&
-        editedPatient.value.phone !== '' &&
         validatePhone() &&
-        editedPatient.value.patientNumber !== '';
+        editedPatient.value.patientNumber !== '' &&
+        !duplicateError.value;
 });
 
 // props 값 반영
-watch(() => props.patient, (newPatient) => {
-    if (newPatient) {
+watch(() => props.patient, (p) => {
+    if (p) {
         editedPatient.value = {
-            name: newPatient.name || '',
-            idNumber: newPatient.idNumber || '',
-            phone: newPatient.phone || '',
-            patientNumber: newPatient.patientNumber || ''
+            name: p.name || '',
+            idNumber: p.residentRegistrationNumber || '',
+            phone: p.phoneNumber || '',
+            patientNumber: p.patientNumber || ''
         };
+        duplicateError.value = '';
         validateIdNumber();
         validatePhone();
     }
 }, { immediate: true });
+
+// 환자번호 변경 시 중복 검사
+watch(() => editedPatient.value.patientNumber, async (newVal) => {
+    if (!newVal || newVal === props.patient?.patientNumber) {
+        duplicateError.value = '';
+        return;
+    }
+
+    try {
+        const response = await PatientService.checkDuplicatePatientNumber({
+            patientNumber: newVal,
+            excludePatientId: props.patient?.id
+        });
+
+        duplicateError.value = response.data.duplicate
+            ? '동일한 환자번호가 이미 존재합니다.'
+            : '';
+    } catch (err) {
+        console.error('중복 확인 실패', err);
+        duplicateError.value = '';
+    }
+});
 
 // 연락처 자동 검증
 watch(() => editedPatient.value.phone, validatePhone);
@@ -95,14 +127,17 @@ watch(() => editedPatient.value.phone, validatePhone);
 const savePatientInfo = () => {
     if (!isFormValid.value) return;
 
-    const isDuplicate = authStore.isPatientIdDuplicate(editedPatient.value.patientNumber);
-    if (isDuplicate && editedPatient.value.patientNumber !== props.patient?.patientNumber) {
-        alert('동일한 환자번호가 이미 존재합니다.');
+    // 중복 에러가 있으면 저장하지 않음
+    if (duplicateError.value) {
         return;
     }
 
-    emit('update', editedPatient.value);
-    emit('close');
+    emit('updatePatient', {
+        name: editedPatient.value.name,
+        residentRegistrationNumber: editedPatient.value.idNumber,
+        phoneNumber: editedPatient.value.phone,
+        patientNumber: editedPatient.value.patientNumber
+    });
 };
 </script>
 
@@ -150,21 +185,24 @@ const savePatientInfo = () => {
                         <label class="block text-sm font-medium text-gray-700 mb-2">환자번호 *</label>
                         <input v-model="editedPatient.patientNumber" type="text"
                             class="w-full p-2 border border-gray-200 rounded-md" placeholder="환자번호 입력">
+                        <p v-if="duplicateError" class="text-orange-500 text-xs mt-1">
+                            {{ duplicateError }}
+                        </p>
                     </div>
                 </div>
             </div>
 
             <!-- 버튼 영역 -->
             <div class="flex justify-center my-6">
-                    <button @click="savePatientInfo" :disabled="!isFormValid" :class="[
-                        'w-32 py-3 rounded-full transition',
-                        isFormValid
-                            ? 'bg-blue-500 hover:bg-blue-600 text-white'
-                            : 'bg-blue-200 text-white cursor-not-allowed'
-                    ]">
-                        CONFIRM
-                    </button>
-                </div>
+                <button @click="savePatientInfo" :disabled="!isFormValid" :class="[
+                    'w-32 py-3 rounded-full transition',
+                    isFormValid
+                        ? 'bg-blue-500 hover:bg-blue-600 text-white'
+                        : 'bg-blue-200 text-white cursor-not-allowed'
+                ]">
+                    CONFIRM
+                </button>
+            </div>
         </div>
     </div>
 </template>

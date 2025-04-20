@@ -20,6 +20,7 @@ const hospitalInfo = ref<{ plan: string } | null>(null);
 const showModal = ref(false);
 const showTestModal = ref(false);
 const selectedTests = ref<string[]>([]);
+const serverError = ref(''); // 서버 에러 메시지를 저장할 변수
 
 // 병원 정보 불러오기
 const fetchHospitalInfo = async () => {
@@ -59,9 +60,24 @@ const handleTestSelection = (tests: string[]) => {
     }
 };
 
-// 환자 정보 수정 후 반영
-const updatePatientInfo = (updated: any) => {
-    patient.value = updated;
+// 환자 정보 수정 함수
+const updatePatientInfo = async (updated: any) => {
+    serverError.value = ''; // 에러 메시지 초기화
+
+    try {
+        await PatientService.updatePatient(patient.value.id, updated);
+        patient.value = { ...patient.value, ...updated }; // 화면 갱신
+        showModal.value = false; // 성공 시에만 모달 닫기
+    } catch (err: any) {
+        console.error('환자 정보 수정 실패:', err);
+
+        // 409 에러(Conflict)인 경우 중복 에러 메시지 설정
+        if (err.response?.status === 409) {
+            serverError.value = '동일한 환자번호가 이미 존재합니다.';
+        } else {
+            alert('환자 정보 수정에 실패했습니다.');
+        }
+    }
 };
 
 // 검사 시작 핸들러
@@ -76,11 +92,16 @@ const handleRecordSelection = (date: string) => {
     }
 };
 
+// 모달 열기 핸들러
+const openEditModal = () => {
+    serverError.value = ''; // 모달 열 때 에러 메시지 초기화
+    showModal.value = true;
+};
+
 // 로그인 페이지로 이동
 const closePage = () => {
     router.push('/');
 };
-
 </script>
 
 <template>
@@ -98,7 +119,7 @@ const closePage = () => {
         <div class="w-[90%] max-w-[1400px] flex">
             <!-- 왼쪽: 환자 정보 -->
             <div class="w-2/5 bg-white p-6 shadow-lg rounded-lg">
-                <PatientInfo :patient="patient" @editPatient="showModal = true" />
+                <PatientInfo :patient="patient" @editPatient="openEditModal" />
 
                 <hr class="my-4 border-gray-300">
 
@@ -119,7 +140,7 @@ const closePage = () => {
     </div>
 
     <!-- 환자정보 수정 모달 -->
-    <EditPatientInfoModal v-if="showModal" :patient="patient" @close="showModal = false"
+    <EditPatientInfoModal v-if="showModal" :patient="patient" :server-error="serverError" @close="showModal = false"
         @updatePatient="updatePatientInfo" />
 
     <SelectTestModal v-if="showTestModal" @close="showTestModal = false" @confirm="handleTestSelection" />
