@@ -28,12 +28,14 @@ const showCompletionPage = ref(false);
 const showExitModal = ref(false);
 const loading = ref(true);
 
-// 검사 데이터 및 응답
+// ✅ 응답: 객관식+주관식 모두 대응
+const responses = ref<{ [testAcronym: string]: { selectedOptionId: number | null, textAnswer: string }[] }>({});
 const testInfo = ref<any>(null);
-const responses = ref<{ [testAcronym: string]: (number | null)[] }>({});
 const testStyles = ref<Record<string, { bg: string; color: string; title: string }>>({});
 const questions = computed(() => testInfo.value?.questions || []);
-const isNextEnabled = computed(() => responses.value[currentTest.value]?.every(v => v !== null));
+const isNextEnabled = computed(() =>
+    responses.value[currentTest.value]?.every(r => r.selectedOptionId !== null || r.textAnswer.trim() !== '')
+);
 
 // 환자 정보
 const patient = ref<any>(null);
@@ -44,7 +46,7 @@ const maskedIdNumber = computed(() =>
 );
 const patientPhone = computed(() => patient.value?.phoneNumber || '정보 없음');
 
-// ✅ 환자 정보 불러오기
+// 환자 정보 불러오기
 const fetchPatient = async () => {
     try {
         const res = await PatientService.getPatientById(Number(patientId));
@@ -55,7 +57,7 @@ const fetchPatient = async () => {
     }
 };
 
-// ✅ 모든 테스트 스타일 정보 미리 로딩
+// 테스트 스타일 미리 불러오기
 const preloadTestStyles = async () => {
     try {
         const allTestsRes = await TestService.getAllTests();
@@ -73,7 +75,7 @@ const preloadTestStyles = async () => {
     }
 };
 
-// ✅ 개별 검사 정보 불러오기
+// 테스트 정보 불러오기
 const fetchTestInfo = async (acronym: string) => {
     try {
         const res = await TestService.getTestInfo(acronym);
@@ -84,8 +86,12 @@ const fetchTestInfo = async (acronym: string) => {
             description: res.data.description,
             questions: parsed.questions
         };
+        // 초기 응답 상태 설정
         if (!responses.value[acronym]) {
-            responses.value[acronym] = Array(parsed.questions.length).fill(null);
+            responses.value[acronym] = parsed.questions.map(() => ({
+                selectedOptionId: null,
+                textAnswer: ''
+            }));
         }
     } catch (err) {
         console.error('테스트 정보 불러오기 실패:', err);
@@ -109,9 +115,15 @@ const completeTest = async () => {
     try {
         const today = new Date().toISOString().slice(0, 10);
         for (const testAcronym of selectedTests.value) {
-            const answerList = testInfo.value.questions.map((q: any, i: number) => ({
+            const answersForThisTest = responses.value[testAcronym];
+            const testQuestions = JSON.parse(
+                (await TestService.getTestInfo(testAcronym)).data.questionsConfig
+            ).questions;
+
+            const answerList = testQuestions.map((q: any, i: number) => ({
                 questionId: q.id,
-                selectedOptionId: responses.value[testAcronym][i]
+                selectedOptionId: answersForThisTest?.[i]?.selectedOptionId ?? null,
+                textAnswer: answersForThisTest?.[i]?.textAnswer ?? ''
             }));
             await TestService.saveTestResult({
                 patientId: Number(patientId),
@@ -127,12 +139,12 @@ const completeTest = async () => {
     }
 };
 
-// 모달 관련
+// 모달
 const openExitModal = () => showExitModal.value = true;
 const continueTest = () => showExitModal.value = false;
 const exitToPatientDetail = () => router.push(`/patient-detail/${patientId}`);
 
-// 초기 실행
+// 시작 시 실행
 onMounted(async () => {
     await fetchPatient();
     await preloadTestStyles();
@@ -155,24 +167,19 @@ watch(currentTestIndex, () => {
             </button>
         </div>
 
-        <!-- 진행바 -->
         <TestProgressBar :selected-tests="selectedTests" :current-test-index="currentTestIndex"
             :show-intro-page="showIntroPage" :show-completion-page="showCompletionPage" :test-styles="testStyles" />
 
-        <!-- 소개 화면 -->
         <TestIntro v-if="showIntroPage" :patient="patient" :masked-id-number="maskedIdNumber"
             :patient-phone="patientPhone" @start="startTest" />
 
-        <!-- 질문 화면 -->
         <TestMain v-else-if="!showIntroPage && !showCompletionPage && testInfo && responses[currentTest]"
             :current-test="currentTest" :test-info="testInfo" :questions="questions"
             v-model:responses="responses[currentTest]" :is-next-enabled="isNextEnabled" :is-last="isLastTest"
             @next="goToNextTest" @complete="completeTest" />
 
-        <!-- 완료 화면 -->
         <TestCompletion v-if="showCompletionPage" :patient-name="patient?.name ?? ''" @confirm="exitToPatientDetail" />
 
-        <!-- 종료 모달 -->
         <ExitTestModal :show="showExitModal" @close="continueTest" @exit="exitToPatientDetail" />
     </div>
 </template>

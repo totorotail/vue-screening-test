@@ -3,7 +3,7 @@ const props = defineProps<{
     currentTest: string,
     testInfo: any,
     questions: any[],
-    responses: (number | null)[],
+    responses: { selectedOptionId: number | null, textAnswer: string }[],
     isNextEnabled: boolean,
     isLast: boolean
 }>();
@@ -19,13 +19,19 @@ const emit = defineEmits(['next', 'complete']);
             <div class="mt-4 max-h-[400px] overflow-y-auto space-y-4">
                 <div v-for="(question, qIndex) in questions" :key="question.id" class="border-b pb-2">
                     <p class="font-semibold">{{ question.id }}. {{ question.text }}</p>
-                    <div class="mt-2 space-y-1">
+
+                    <div class="mt-2 space-y-1" v-if="question.type === 'MULTIPLE_CHOICE'">
                         <label v-for="option in question.options" :key="option.id"
                             class="flex items-center space-x-2 cursor-pointer">
                             <input type="radio" :name="`q${question.id}`" :value="option.id"
-                                v-model="props.responses[qIndex]" class="cursor-pointer" />
+                                v-model="props.responses[qIndex].selectedOptionId" class="cursor-pointer" />
                             <span>{{ option.text }}</span>
                         </label>
+                    </div>
+
+                    <div v-if="question.type === 'TEXT'" class="mt-2">
+                        <input type="text" v-model="props.responses[qIndex].textAnswer"
+                            class="w-full p-2 border border-gray-300 rounded" placeholder="입력하세요" />
                     </div>
                 </div>
             </div>
