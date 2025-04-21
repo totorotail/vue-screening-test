@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useAuthStore } from '../stores/authStore';
-import { useTestDetailsStore } from '../stores/testDetailsStore';
+import TestService from '../services/TestService';
+import PatientService from '../services/PatientService';
+
 import WideLogo from '../components/WideLogo.vue';
 import ExitTestModal from '../components/ExitTestModal.vue';
 import TestProgressBar from '../components/TestProgressBar.vue';
@@ -10,77 +11,142 @@ import TestIntro from '../components/TestIntro.vue';
 import TestMain from '../components/TestMain.vue';
 import TestCompletion from '../components/TestCompletion.vue';
 
-// 라우터 및 스토어 설정
+// 라우터 관련
 const route = useRoute();
 const router = useRouter();
-const authStore = useAuthStore();
-const testDetailsStore = useTestDetailsStore();
-
-// 화면 상태 관련 변수
-const showIntroPage = ref(true); // 검사 시작 전 화면
-const showCompletionPage = ref(false); // 검사 완료 후 화면
-const showExitModal = ref(false); // 종료 모달 표시 여부
-
-// 라우터에서 전달된 환자 ID와 검사 목록
 const patientId = route.query.patientId as string;
 const selectedTests = ref<string[]>((route.query.tests as string || '').split(',').filter(Boolean));
-
-// 현재 검사 인덱스 및 키
 const currentTestIndex = ref(0);
-const currentTest = computed(() => selectedTests.value[currentTestIndex.value] || '');
-const currentTestKey = computed(() => currentTest.value || '');
 
-// 환자 정보 계산
-const patient = computed(() => {
-    return authStore.user?.patients?.find(p => String(p.patientNumber) === patientId) || null;
-});
+// 진행 중 검사 상태
+const currentTest = computed(() => selectedTests.value[currentTestIndex.value]);
+const isLastTest = computed(() => currentTestIndex.value === selectedTests.value.length - 1);
 
-// 주민번호 마스킹 처리
-const maskedIdNumber = computed(() => {
-    if (!patient.value?.idNumber) return '정보 없음';
-    return patient.value.idNumber.slice(0, 8) + '******';
-});
+// 페이지 상태
+const showIntroPage = ref(true);
+const showCompletionPage = ref(false);
+const showExitModal = ref(false);
+const loading = ref(true);
 
-// 각 검사에 대한 응답 저장
-const responses = ref<{ [key: string]: (number | null)[] }>({});
+// 검사 데이터 및 응답
+const testInfo = ref<any>(null);
+const responses = ref<{ [testAcronym: string]: (number | null)[] }>({});
+const testStyles = ref<Record<string, { bg: string; color: string; title: string }>>({});
+const questions = computed(() => testInfo.value?.questions || []);
+const isNextEnabled = computed(() => responses.value[currentTest.value]?.every(v => v !== null));
 
-// 현재 검사 정보와 질문
-const testInfo = computed(() => {
-    if (!currentTest.value) return null;
-    return testDetailsStore.testDetails[currentTest.value as keyof typeof testDetailsStore.testDetails] || null;
-});
-const currentQuestions = computed(() => testInfo.value ? testInfo.value.questions : []);
+// 환자 정보
+const patient = ref<any>(null);
+const maskedIdNumber = computed(() =>
+    patient.value?.residentRegistrationNumber
+        ? patient.value.residentRegistrationNumber.slice(0, 8) + '******'
+        : '정보 없음'
+);
+const patientPhone = computed(() => patient.value?.phoneNumber || '정보 없음');
 
-// 새로운 검사 시작 시 응답 배열 초기화
-watch(currentTest, (newTest) => {
-    if (newTest && !responses.value[newTest]) {
-        responses.value[newTest] = Array(currentQuestions.value.length).fill(null);
+// ✅ 환자 정보 불러오기
+const fetchPatient = async () => {
+    try {
+        const res = await PatientService.getPatientById(Number(patientId));
+        patient.value = res.data;
+    } catch (error) {
+        console.error('환자 정보 조회 실패:', error);
+        router.push('/');
     }
-}, { immediate: true });
+};
 
-// 검사 전환 시 스크롤 최상단으로 이동
+// ✅ 모든 테스트 스타일 정보 미리 로딩
+const preloadTestStyles = async () => {
+    try {
+        const allTestsRes = await TestService.getAllTests();
+        allTestsRes.data.forEach((test: any) => {
+            if (selectedTests.value.includes(test.acronym)) {
+                testStyles.value[test.acronym] = {
+                    bg: test.badgeBgColor,
+                    color: test.badgeTextColor,
+                    title: test.title
+                };
+            }
+        });
+    } catch (error) {
+        console.error('테스트 스타일 로딩 실패:', error);
+    }
+};
+
+// ✅ 개별 검사 정보 불러오기
+const fetchTestInfo = async (acronym: string) => {
+    try {
+        const res = await TestService.getTestInfo(acronym);
+        const parsed = JSON.parse(res.data.questionsConfig);
+        testInfo.value = {
+            acronym: res.data.acronym,
+            title: res.data.title,
+            description: res.data.description,
+            questions: parsed.questions
+        };
+        if (!responses.value[acronym]) {
+            responses.value[acronym] = Array(parsed.questions.length).fill(null);
+        }
+    } catch (err) {
+        console.error('테스트 정보 불러오기 실패:', err);
+    } finally {
+        loading.value = false;
+    }
+};
+
+// 시작, 다음, 완료
+const startTest = () => {
+    showIntroPage.value = false;
+    fetchTestInfo(currentTest.value);
+};
+
+const goToNextTest = () => {
+    currentTestIndex.value++;
+    fetchTestInfo(currentTest.value);
+};
+
+const completeTest = async () => {
+    try {
+        const today = new Date().toISOString().slice(0, 10);
+        for (const testAcronym of selectedTests.value) {
+            const answerList = testInfo.value.questions.map((q: any, i: number) => ({
+                questionId: q.id,
+                selectedOptionId: responses.value[testAcronym][i]
+            }));
+            await TestService.saveTestResult({
+                patientId: Number(patientId),
+                testAcronym,
+                testDate: today,
+                answers: answerList
+            });
+        }
+        showCompletionPage.value = true;
+    } catch (err) {
+        console.error('검사 저장 실패:', err);
+        alert('검사 저장 중 오류가 발생했습니다.');
+    }
+};
+
+// 모달 관련
+const openExitModal = () => showExitModal.value = true;
+const continueTest = () => showExitModal.value = false;
+const exitToPatientDetail = () => router.push(`/patient-detail/${patientId}`);
+
+// 초기 실행
+onMounted(async () => {
+    await fetchPatient();
+    await preloadTestStyles();
+});
+
 watch(currentTestIndex, () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 });
-
-// 현재 검사에 모든 응답이 입력되었는지 여부
-const isNextEnabled = computed(() => (responses.value[currentTest.value] ?? []).every(response => response !== null));
-
-// 화면 전환용 함수들
-const startTest = () => { showIntroPage.value = false; };
-const goToNextTest = () => { currentTestIndex.value++; };
-const completeTest = () => { showCompletionPage.value = true; };
-const openExitModal = () => { showExitModal.value = true; };
-const continueTest = () => { showExitModal.value = false; };
-const exitToPatientDetail = () => { router.push(`/patient-detail/${patientId}`); };
 </script>
 
 <template>
     <div class="flex flex-col items-center min-h-screen bg-gray-50 w-full">
-        <!-- 상단 로고 -->
         <WideLogo class="w-[90%] max-w-[1400px] mt-4 mb-6" />
 
-        <!-- 헤더 영역 -->
         <div
             class="w-[90%] max-w-[1400px] flex justify-between items-center bg-white px-6 py-3 shadow-md rounded-lg mb-2">
             <h2 class="text-lg font-bold">검사하기</h2>
@@ -89,21 +155,22 @@ const exitToPatientDetail = () => { router.push(`/patient-detail/${patientId}`);
             </button>
         </div>
 
-        <!-- 검사 진행 바 -->
+        <!-- 진행바 -->
         <TestProgressBar :selected-tests="selectedTests" :current-test-index="currentTestIndex"
-            :show-intro-page="showIntroPage" :show-completion-page="showCompletionPage" />
+            :show-intro-page="showIntroPage" :show-completion-page="showCompletionPage" :test-styles="testStyles" />
 
-        <!-- 검사 시작 전 화면 -->
-        <TestIntro v-if="showIntroPage" :patient="patient" :masked-id-number="maskedIdNumber" @start="startTest" />
+        <!-- 소개 화면 -->
+        <TestIntro v-if="showIntroPage" :patient="patient" :masked-id-number="maskedIdNumber"
+            :patient-phone="patientPhone" @start="startTest" />
 
-        <!-- 질문 영역 -->
-        <TestMain v-else-if="!showIntroPage && !showCompletionPage" :current-test="currentTest" :test-info="testInfo"
-            :questions="currentQuestions" v-model:responses="responses[currentTestKey]" :is-next-enabled="isNextEnabled"
-            :is-last="currentTestIndex === selectedTests.length - 1" @next="goToNextTest" @complete="completeTest" />
+        <!-- 질문 화면 -->
+        <TestMain v-else-if="!showIntroPage && !showCompletionPage && testInfo && responses[currentTest]"
+            :current-test="currentTest" :test-info="testInfo" :questions="questions"
+            v-model:responses="responses[currentTest]" :is-next-enabled="isNextEnabled" :is-last="isLastTest"
+            @next="goToNextTest" @complete="completeTest" />
 
-        <!-- 검사 완료 화면 -->
-        <TestCompletion v-if="showCompletionPage" :patient-name="patient?.name ?? ''"
-            @confirm="() => router.push('/return-to-admin')" />
+        <!-- 완료 화면 -->
+        <TestCompletion v-if="showCompletionPage" :patient-name="patient?.name ?? ''" @confirm="exitToPatientDetail" />
 
         <!-- 종료 모달 -->
         <ExitTestModal :show="showExitModal" @close="continueTest" @exit="exitToPatientDetail" />
