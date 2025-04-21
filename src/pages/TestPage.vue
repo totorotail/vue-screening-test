@@ -11,7 +11,6 @@ import TestIntro from '../components/TestIntro.vue';
 import TestMain from '../components/TestMain.vue';
 import TestCompletion from '../components/TestCompletion.vue';
 
-// 라우터 관련
 const route = useRoute();
 const router = useRouter();
 const patientId = route.query.patientId as string;
@@ -28,7 +27,7 @@ const showCompletionPage = ref(false);
 const showExitModal = ref(false);
 const loading = ref(true);
 
-// ✅ 응답: 객관식+주관식 모두 대응
+// 응답: 객관식+주관식 모두 대응
 const responses = ref<{ [testAcronym: string]: { selectedOptionId: number | null, textAnswer: string }[] }>({});
 const testInfo = ref<any>(null);
 const testStyles = ref<Record<string, { bg: string; color: string; title: string }>>({});
