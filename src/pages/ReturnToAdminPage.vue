@@ -1,44 +1,48 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { useRouter } from 'vue-router';
-import { useAuthStore } from '../stores/authStore';
+import { computed, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import AuthService from '../services/AuthService';
+import HospitalService from '../services/HospitalService';
 
+const route = useRoute();
 const router = useRouter();
-const authStore = useAuthStore();
 
-// 비밀번호 입력 값
 const password = ref('');
+const showPasswordError = ref(false);
+const isSubmitting = ref(false);
 
-// NEXT 버튼 활성화 여부 (비밀번호가 입력되었는지 확인)
-const isNextEnabled = computed(() => password.value.length > 0);
+// 로그인된 병원 이메일 추출
+const email = AuthService.getUserEmail();
 
-// 로그인한 사용자의 최근 검사 환자 찾기
-const getLatestPatientNumber = (): string | null => {
-    if (!authStore.user || !authStore.user.patients.length) return null;
-    
-    // 가장 최근 검사한 환자를 찾음 (lastExam 기준으로 정렬 후 첫 번째 환자 선택)
-    const latestPatient = [...authStore.user.patients]
-        .filter(patient => patient.lastExam) // 검사 기록이 있는 환자만
-        .sort((a, b) => new Date(b.lastExam!).getTime() - new Date(a.lastExam!).getTime())[0]; 
+// NEXT 버튼 활성화
+const isNextEnabled = computed(() => password.value.length > 0 && !isSubmitting.value);
 
-    return latestPatient ? latestPatient.patientNumber : null;
-};
+// 병원 비밀번호 검증 후 환자 상세 페이지 이동
+const goToPatientDetail = async () => {
+    isSubmitting.value = true;
+    showPasswordError.value = false;
 
-// 비밀번호 검증 후 해당 환자의 상세 페이지로 이동
-const goToAdminMode = () => {
-    if (password.value === 'Admin123!') { // 실제 구현에서는 서버 요청 필요
-        const latestPatientNumber = getLatestPatientNumber();
-        if (latestPatientNumber) {
-            router.push(`/patient-detail/${latestPatientNumber}`); // 해당 환자의 상세 페이지로 이동
+    try {
+        if (!email) throw new Error('병원 이메일 정보 없음');
+
+        // 로그인 재시도 (비밀번호 검증 용도)
+        await HospitalService.login({ email, password: password.value });
+
+        // 성공 → 환자 상세 페이지 이동
+        const patientId = route.query.patientId;
+        if (patientId) {
+            router.push(`/patient-detail/${patientId}`);
         } else {
-            alert('최근 검사한 환자 정보가 없습니다.');
+            showPasswordError.value = true;
         }
-    } else {
-        alert('비밀번호가 올바르지 않습니다.');
+    } catch (error) {
+        showPasswordError.value = true;
+        console.error('비밀번호 검증 실패:', error);
+    } finally {
+        isSubmitting.value = false;
     }
 };
 </script>
-
 
 <template>
     <div class="flex items-center justify-center min-h-screen bg-gray-100">
@@ -47,14 +51,16 @@ const goToAdminMode = () => {
 
             <!-- 비밀번호 입력 -->
             <div class="text-left mb-6">
-                <label for="password" class="block text-sm font-medium text-gray-600">비밀번호</label>
-                <input type="password" id="password" v-model="password"
-                    class="mt-2 w-full px-4 py-3 border rounded-lg bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    placeholder="********" />
+                <label class="text-sm font-medium text-gray-600">비밀번호 *</label>
+                <input type="password" v-model="password" placeholder="비밀번호를 입력하세요"
+                    class="mt-2 w-full px-4 py-3 border rounded-lg bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                <p v-if="showPasswordError" class="text-orange-500 text-xs mt-2">
+                    비밀번호가 맞지 않습니다.
+                </p>
             </div>
 
             <!-- NEXT 버튼 -->
-            <button @click="goToAdminMode" :disabled="!isNextEnabled"
+            <button @click="goToPatientDetail" :disabled="!isNextEnabled"
                 class="w-full py-3 mt-4 rounded-full text-lg font-semibold transition" :class="isNextEnabled
                     ? 'bg-blue-500 text-white hover:bg-blue-600'
                     : 'bg-blue-200 text-gray-400 cursor-not-allowed'">

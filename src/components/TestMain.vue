@@ -20,11 +20,11 @@ const emit = defineEmits(['next', 'complete']);
                 <div v-for="(question, qIndex) in questions" :key="question.id" class="border-b pb-2">
                     <p class="font-semibold">{{ question.id }}. {{ question.text }}</p>
                     <div class="mt-2 space-y-1">
-                        <label v-for="(option, oIndex) in question.options" :key="oIndex"
+                        <label v-for="option in question.options" :key="option.id"
                             class="flex items-center space-x-2 cursor-pointer">
-                            <input type="radio" :name="`q${question.id}`" :value="option"
+                            <input type="radio" :name="`q${question.id}`" :value="option.id"
                                 v-model="props.responses[qIndex]" class="cursor-pointer" />
-                            <span>{{ option }}</span>
+                            <span>{{ option.text }}</span>
                         </label>
                     </div>
                 </div>
