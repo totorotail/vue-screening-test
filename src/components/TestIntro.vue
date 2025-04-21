@@ -1,8 +1,10 @@
 <script setup lang="ts">
 defineProps<{
     patient: any,
-    maskedIdNumber: string
+    maskedIdNumber: string,
+    patientPhone: string
 }>();
+
 const emit = defineEmits(['start']);
 </script>
 
@@ -14,7 +16,7 @@ const emit = defineEmits(['start']);
         <div class="bg-gray-100 p-6 rounded-lg inline-block text-left text-gray-700 space-y-3">
             <p><strong>환자명:</strong> {{ patient?.name || '정보 없음' }}</p>
             <p><strong>주민번호:</strong> {{ maskedIdNumber }}</p>
-            <p><strong>연락처:</strong> {{ patient?.phone || '정보 없음' }}</p>
+            <p><strong>연락처:</strong> {{ patientPhone }}</p>
         </div>
 
         <div class="mt-6">
