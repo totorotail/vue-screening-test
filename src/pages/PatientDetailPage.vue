@@ -145,9 +145,9 @@ const closePage = () => {
 
     <!-- 환자정보 수정 모달 -->
     <EditPatientInfoModal v-if="showModal" :patient="patient" :server-error="serverError" @close="showModal = false"
-        @updatePatient="updatePatientInfo" />
+        @updatePatient="updatePatientInfo" class="z-50" />
 
-    <SelectTestModal v-if="showTestModal" @close="showTestModal = false" @confirm="handleTestSelection" />
+    <SelectTestModal v-if="showTestModal" @close="showTestModal = false" @confirm="handleTestSelection" class="z-50" />
 </template>
 
 <style scoped>
