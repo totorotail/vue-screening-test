@@ -12,11 +12,34 @@ interface TestOption {
     score?: number;
 }
 
+interface QuestionWithAnswer {
+    questionId: number;
+    questionText: string;
+    questionType: string;
+    options: TestOption[];
+    selectedOptionId?: number;
+    textAnswer?: string;
+    score?: number;
+}
+
+interface TestDetail {
+    testId: number;
+    acronym: string;
+    title: string;
+    description: string;
+    patientId: number;
+    testDate: string;
+    totalScore: number;
+    questionsWithAnswers: QuestionWithAnswer[];
+    comment?: string;
+    badgeBgColor?: string;
+    badgeTextColor?: string;
+}
+
 const isDropdownOpen = ref(false);
 const selectedDate = ref<string | null>(null);
 const selectedTest = ref<string>(''); // 초기값을 빈 문자열로 설정
-const testDetails = ref<any>(null);
-const testData = ref<any>(null);
+const testDetails = ref<TestDetail | null>(null);
 const loading = ref(false);
 const comment = ref('');
 
@@ -70,7 +93,6 @@ const loadAvailableTests = async () => {
 const loadTestDetail = async () => {
     if (!selectedDate.value || !selectedTest.value || !props.patient?.id) {
         testDetails.value = null;
-        testData.value = null;
         return;
     }
 
@@ -83,22 +105,10 @@ const loadTestDetail = async () => {
         );
 
         testDetails.value = response.data;
-        testData.value = {
-            totalScore: response.data.totalScore,
-            responses: response.data.questionsWithAnswers.map((q: any) => {
-                if (q.selectedOptionId) {
-                    const selectedOption = q.options.find((opt: TestOption) => opt.id === q.selectedOptionId);
-                    return selectedOption ? selectedOption.text : '응답 없음';
-                }
-                return q.textAnswer || '응답 없음';
-            })
-        };
-
         comment.value = response.data.comment || '';
     } catch (error) {
         console.error('테스트 상세 정보 로드 실패:', error);
         testDetails.value = null;
-        testData.value = null;
     } finally {
         loading.value = false;
     }
@@ -135,7 +145,7 @@ watch([() => selectedDate.value, () => selectedTest.value], async () => {
 
 // 코멘트 저장 함수
 const saveComment = async () => {
-    if (!selectedDate.value || !selectedTest.value || !props.patient?.id) return;
+    if (!selectedDate.value || !selectedTest.value || !props.patient?.id || !testDetails.value) return;
 
     try {
         // 현재 테스트 결과 가져오기
@@ -177,25 +187,25 @@ defineExpose({ updateSelectedDate });
 <template>
     <div v-if="selectedDate" class="bg-white p-6 shadow-lg rounded-lg flex flex-col h-full overflow-hidden">
         <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-bold">{{ selectedDate.replace(/-/g, '.') }} 검사</h3>
+            <h3 class="text-base font-bold">{{ selectedDate.replace(/-/g, '.') }} 검사</h3>
             <button class="px-3 py-1 bg-gray-300 text-sm font-semibold rounded-md">PRINT</button>
         </div>
 
         <!-- 검사 선택 드롭다운 -->
         <div class="relative mb-4">
             <div @click="isDropdownOpen = !isDropdownOpen"
-                class="border rounded px-4 py-2 cursor-pointer flex items-center justify-between">
+                class="border rounded px-3 py-2 cursor-pointer flex items-center justify-between w-44">
                 <span v-if="selectedTest" class="px-2 py-1 rounded text-xs font-bold" :style="{
                     backgroundColor: selectedTestCategory?.bg || '#f3f4f6',
                     color: selectedTestCategory?.color || '#111827'
                 }">
                     {{ selectedTest }}
                 </span>
-                <span v-else class="text-gray-400">검사를 선택하세요</span>
+                <span v-else class="text-gray-400 text-xs">검사를 선택하세요</span>
                 <span class="ml-auto">&#9662;</span>
             </div>
 
-            <div v-if="isDropdownOpen" class="absolute w-full px-2 bg-white border shadow-md rounded-lg z-10">
+            <div v-if="isDropdownOpen" class="absolute w-44 px-2 bg-white border shadow-md rounded-lg z-10">
                 <div v-for="test in filteredTests" :key="test" @click="selectedTest = test; isDropdownOpen = false"
                     class="p-2 cursor-pointer flex items-center hover:bg-gray-100">
                     <span class="px-2 py-1 rounded text-xs font-bold" :style="{
@@ -213,40 +223,46 @@ defineExpose({ updateSelectedDate });
         </div>
 
         <div v-else-if="testDetails" class="flex flex-col flex-grow overflow-hidden">
-            <!-- 스크롤 가능한 내용 영역 - 높이 제한하여 코멘트가 더 위로 올라오게 -->
-            <div class="h-[calc(100%-150px)] overflow-auto">
+            <!-- 스크롤 가능한 내용 영역 -->
+            <div class="flex-grow overflow-auto pb-4">
                 <!-- 총 그래프에서 선택된 검사만 표시 -->
                 <TotalGraph v-if="selectedTest" :patient="patient" :selectedTest="selectedTest" :hideHeader="true" />
 
-                <!-- 테스트 점수 표시 -->
-                <div class="mt-4 bg-gray-50 p-2 rounded-md">
-                    <p class="font-semibold text-sm">총 점수: {{ testDetails.totalScore }}</p>
-                </div>
-
                 <!-- 질문 및 응답 표시 -->
-                <div class="mt-2">
-                    <div v-for="(question, index) in testDetails.questionsWithAnswers" :key="index"
-                        class="mb-3 p-2 bg-gray-50 rounded-md shadow-sm">
-                        <p class="text-gray-800 text-xs font-medium">{{ index + 1 }}. {{ question.questionText }}</p>
+                <div class="mt-4">
+                    <div v-for="(question, index) in testDetails.questionsWithAnswers" :key="question.questionId"
+                        class="mb-4">
+                        <!-- 질문 번호와 텍스트 -->
+                        <div class="flex">
+                            <span class="text-sm font-medium mr-2">{{ index + 1 }}.</span>
+                            <span class="text-sm">{{ question.questionText }}</span>
+                        </div>
 
-                        <!-- 모든 선택 옵션 표시 -->
-                        <div class="mt-1">
-                            <div v-for="option in question.options" :key="option.id"
-                                class="ml-4 text-xs flex items-start"
-                                :class="{ 'font-semibold': option.id === question.selectedOptionId }">
-                                <input type="radio" :checked="option.id === question.selectedOptionId" :disabled="true"
-                                    class="mt-0.5 mr-1 h-3 w-3">
-                                <span>{{ option.text }}</span>
+                        <!-- 객관식인 경우 라디오 버튼 스타일로 표시 -->
+                        <div v-if="question.questionType !== 'TEXT'" class="mt-2 ml-7">
+                            <div v-for="option in question.options" :key="option.id" class="flex items-center mt-1">
+                                <!-- 라디오 버튼 스타일 -->
+                                <div
+                                    class="w-4 h-4 mr-2 rounded-full border border-gray-300 flex items-center justify-center">
+                                    <div v-if="option.id === question.selectedOptionId"
+                                        class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                </div>
+                                <span class="text-sm">{{ option.text }}</span>
                             </div>
+                        </div>
+
+                        <!-- 주관식인 경우 텍스트 표시 -->
+                        <div v-else class="mt-2 ml-7 text-sm text-gray-700">
+                            {{ question.textAnswer || "답변 없음" }}
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 코멘트 영역 (고정 높이, 항상 화면에 보이도록) -->
-            <div class="h-[130px] mt-4 border-t border-gray-200 pt-2">
-                <label for="comment" class="block mb-1 text-xs font-medium text-gray-700">코멘트</label>
-                <textarea id="comment" class="w-full h-[100px] border p-2 rounded text-xs" placeholder="코멘트를 써주세요."
+            <!-- 코멘트 영역 -->
+            <div class="mt-4 border-t pt-2">
+                <label for="comment" class="block mb-1 text-sm font-medium text-gray-700">코멘트</label>
+                <textarea id="comment" class="w-full h-24 border p-2 rounded text-sm" placeholder="코멘트를 써주세요."
                     v-model="comment" @input="updateComment"></textarea>
             </div>
         </div>
