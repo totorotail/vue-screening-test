@@ -261,7 +261,6 @@ defineExpose({ updateSelectedDate });
 
             <!-- 코멘트 영역 -->
             <div class="mt-4 border-t pt-2">
-                <label for="comment" class="block mb-1 text-sm font-medium text-gray-700">코멘트</label>
                 <textarea id="comment" class="w-full h-24 border p-2 rounded text-sm" placeholder="코멘트를 써주세요."
                     v-model="comment" @input="updateComment"></textarea>
             </div>
