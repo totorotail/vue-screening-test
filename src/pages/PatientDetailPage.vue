@@ -105,7 +105,9 @@ const closePage = () => {
 </script>
 
 <template>
-    <div class="flex flex-col items-center min-h-screen bg-gray-50 w-full" v-if="patient && hospitalInfo">
+    <!-- 전체 페이지를 고정 높이로 설정 -->
+    <div class="flex flex-col items-center min-h-screen h-screen bg-gray-50 w-full" v-if="patient && hospitalInfo">
+        <!-- 헤더 영역 -->
         <WideLogo class="w-[90%] max-w-[1400px] mt-4 mb-6" :showSearch="true" :userPlan="hospitalInfo.plan" />
 
         <div
@@ -116,24 +118,26 @@ const closePage = () => {
             </button>
         </div>
 
-        <div class="w-[90%] max-w-[1400px] flex">
+        <!-- 메인 컨텐츠 영역 - 남은 공간을 모두 채우도록 flex-grow 적용 -->
+        <div class="w-[90%] max-w-[1400px] flex flex-grow overflow-hidden">
             <!-- 왼쪽: 환자 정보 -->
-            <div class="w-2/5 bg-white p-6 shadow-lg rounded-lg">
+            <div class="w-2/5 bg-white p-6 shadow-lg rounded-lg h-full flex flex-col">
+                <!-- 환자 정보는 항상 표시 (스크롤 없음) -->
                 <PatientInfo :patient="patient" @editPatient="openEditModal" />
 
                 <hr class="my-4 border-gray-300">
 
-                <!-- 총 그래프 -->
+                <!-- 총 그래프 (그래프 부분만 스크롤) -->
                 <TotalGraph :patient="patient" />
             </div>
 
             <!-- 중앙: 검사 기록 -->
-            <div class="w-1/5 ml-4">
+            <div class="w-1/5 ml-4 h-full">
                 <TestRecords :patient="patient" @startTest="handleStartTest" @recordSelected="handleRecordSelection" />
             </div>
 
-            <!-- 오른쪽: 빈 공간 유지 -->
-            <div class="w-2/5">
+            <!-- 오른쪽: 검사 상세 정보 -->
+            <div class="w-2/5 ml-4 h-full">
                 <TestRecordDetails ref="testRecordDetailsRef" :patient="patient" />
             </div>
         </div>
@@ -145,3 +149,6 @@ const closePage = () => {
 
     <SelectTestModal v-if="showTestModal" @close="showTestModal = false" @confirm="handleTestSelection" />
 </template>
+
+<style scoped>
+</style>
