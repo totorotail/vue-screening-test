@@ -112,7 +112,7 @@ const goToNextTest = () => {
 
 const completeTest = async () => {
     try {
-        const today = new Date().toISOString().slice(0, 10);
+        const today = new Date().toLocaleDateString('en-CA'); // en-CA는 YYYY-MM-DD 형식을 사용
         for (const testAcronym of selectedTests.value) {
             const answersForThisTest = responses.value[testAcronym];
             const testQuestions = JSON.parse(
