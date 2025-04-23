@@ -121,7 +121,7 @@ const closePage = () => {
         <!-- 메인 컨텐츠 영역 - 남은 공간을 모두 채우도록 flex-grow 적용 -->
         <div class="w-[90%] max-w-[1400px] flex flex-grow overflow-hidden">
             <!-- 왼쪽: 환자 정보 -->
-            <div class="w-2/5 bg-white p-6 shadow-lg rounded-lg h-full flex flex-col">
+            <div class="basis-[35%] bg-white p-6 shadow-lg rounded-lg h-full flex flex-col">
                 <!-- 환자 정보는 항상 표시 (스크롤 없음) -->
                 <PatientInfo :patient="patient" @editPatient="openEditModal" />
 
@@ -132,12 +132,12 @@ const closePage = () => {
             </div>
 
             <!-- 중앙: 검사 기록 -->
-            <div class="w-1/5 ml-4 h-full">
+            <div class="basis-[25%] ml-4 h-full">
                 <TestRecords :patient="patient" @startTest="handleStartTest" @recordSelected="handleRecordSelection" />
             </div>
 
             <!-- 오른쪽: 검사 상세 정보 -->
-            <div class="w-2/5 ml-4 h-full">
+            <div class="basis-[40%] ml-4 h-full">
                 <TestRecordDetails ref="testRecordDetailsRef" :patient="patient" />
             </div>
         </div>
