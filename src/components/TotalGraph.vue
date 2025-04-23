@@ -71,7 +71,7 @@ const processExamData = (testId: string, historyData: any[]): void => {
     // 매핑 배열 초기화
     dateMapping.value[testId] = Array(5).fill('');
 
-    // 기본 데이터 구조 생성
+    // 기본 데이터 구조 생성 - 항상 5개의 데이터 포인트를 가지도록 설정
     chartData.value[testId] = {
         labels: ['', '', '', '', ''],
         datasets: [
@@ -120,7 +120,7 @@ const processExamData = (testId: string, historyData: any[]): void => {
         }
     }
 
-    // Chart.js 데이터 포맷으로 변환
+    // Chart.js 데이터 포맷으로 변환 - 항상 5개의 데이터 포인트를 가지도록 함
     chartData.value[testId] = {
         labels: labels,
         datasets: [
@@ -268,21 +268,28 @@ const chartOptions: ChartOptions<'line'> = {
 };
 
 // 날짜 레이블 위치 조정 함수
-const adjustLabelPosition = (index: number, totalLabels: number): number => {
-    // 기본 위치 계산
-    let position = index * 25;
+const adjustLabelPosition = (index: number): number => {
+    // 항상 5개의 고정된 위치에 표시
+    const positions = [11, 30, 53, 75, 94];
+    return positions[index];
+};
 
-    // 첫 번째 라벨은 약간 오른쪽으로 이동
-    if (index === 0 && totalLabels > 1) {
-        position = 5;
+// 그래프 데이터 존재 여부 확인
+const hasData = (testId: string): boolean => {
+    if (!chartData.value[testId]) return false;
+    return chartData.value[testId].datasets[0].data.some(value => value !== null);
+};
+
+// 그래프에 표시할 날짜가 한 개일 때만 표시할 레이블 계산
+const getSingleDateLabel = (testId: string): string => {
+    if (!dateMapping.value[testId]) return '';
+
+    // 데이터가 있는 날짜 중 가장 최근 날짜 찾기
+    const dates = dateMapping.value[testId].filter(date => date !== '');
+    if (dates.length > 0) {
+        return formatDate(dates[dates.length - 1]);
     }
-
-    // 마지막 라벨은 약간 왼쪽으로 이동
-    if (index === 4 || (totalLabels > 0 && index === totalLabels - 1 && index > 0)) {
-        position = 95;
-    }
-
-    return position;
+    return '';
 };
 </script>
 
@@ -319,11 +326,21 @@ const adjustLabelPosition = (index: number, totalLabels: number): number => {
 
                     <!-- 날짜 레이블 -->
                     <div class="absolute bottom-0 w-full">
-                        <template v-for="label in getDateLabels(graph.id)" :key="label.text">
-                            <span
-                                :style="`position: absolute; bottom: -20px; left: ${adjustLabelPosition(label.index, getDateLabels(graph.id).length)}%; transform: translateX(-50%);`"
+                        <!-- 데이터가 있는 경우 -->
+                        <template v-if="hasData(graph.id)">
+                            <template v-for="label in getDateLabels(graph.id)" :key="label.text">
+                                <span
+                                    :style="`position: absolute; bottom: -20px; left: ${adjustLabelPosition(label.index)}%; transform: translateX(-50%);`"
+                                    class="text-xs text-black">
+                                    {{ label.text }}
+                                </span>
+                            </template>
+                        </template>
+                        <!-- 데이터가 없거나 한 개인 경우 -->
+                        <template v-else>
+                            <span style="position: absolute; bottom: -20px; left: 100%; transform: translateX(-50%);"
                                 class="text-xs text-black">
-                                {{ label.text }}
+                                {{ getSingleDateLabel(graph.id) }}
                             </span>
                         </template>
                     </div>
