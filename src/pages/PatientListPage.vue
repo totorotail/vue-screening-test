@@ -40,10 +40,10 @@ const fetchPatients = async () => {
   try {
     if (query) {
       const res = await PatientService.searchPatientsByName(query, 0, 1000);
-      allPatients.value = res.data.content;
+      allPatients.value = res.data.content.map((p: any) => ({ ...p, lastExam: null })); // 검색은 lastExam 없음
     } else {
-      const res = await PatientService.getAllPatients(0, 1000);
-      allPatients.value = res.data.content;
+      const res = await PatientService.getAllPatientsWithLastExam();
+      allPatients.value = res.data; // 응답이 PatientWithLastExamDto[]
     }
   } catch (err) {
     console.error('환자 목록 실패:', err);

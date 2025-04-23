@@ -30,6 +30,11 @@ const PatientService = {
         return apiClient.get(`/patient?page=${page}&size=${size}`);
     },
 
+    // 환자 전체 목록 + 최근 검사일 포함 조회
+    getAllPatientsWithLastExam() {
+        return apiClient.get('/patient/with-last-exam');
+    },
+
     // 환자 이름으로 검색 (페이징)
     searchPatientsByName(name: string, page = 0, size = 10) {
         return apiClient.get(`/patient/search?name=${encodeURIComponent(name)}&page=${page}&size=${size}`);
