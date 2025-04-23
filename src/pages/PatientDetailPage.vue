@@ -122,13 +122,18 @@ const closePage = () => {
         <div class="w-[90%] max-w-[1400px] flex flex-grow overflow-hidden">
             <!-- 왼쪽: 환자 정보 -->
             <div class="basis-[35%] bg-white p-6 shadow-lg rounded-lg h-full flex flex-col">
-                <!-- 환자 정보는 항상 표시 (스크롤 없음) -->
-                <PatientInfo :patient="patient" @editPatient="openEditModal" />
+                <!-- 환자 정보는 항상 표시 (고정 높이) -->
+                <PatientInfo :patient="patient" @editPatient="openEditModal" class="flex-shrink-0" />
 
-                <hr class="my-4 border-gray-300">
+                <hr class="my-4 border-gray-300 flex-shrink-0">
 
-                <!-- 총 그래프 (그래프 부분만 스크롤) -->
-                <TotalGraph :patient="patient" />
+                <!-- 최대 높이를 제한하고 오버플로우 처리 -->
+                <div class="flex-grow relative">
+                    <TotalGraph :patient="patient" class="absolute inset-0" :hideHeader="false" />
+
+                    <!-- 페이지 하단에 투명 요소 추가하여 스크롤 범위 제한 -->
+                    <div class="absolute bottom-0 h-4 w-full bg-transparent"></div>
+                </div>
             </div>
 
             <!-- 중앙: 검사 기록 -->
@@ -150,5 +155,4 @@ const closePage = () => {
     <SelectTestModal v-if="showTestModal" @close="showTestModal = false" @confirm="handleTestSelection" class="z-50" />
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>

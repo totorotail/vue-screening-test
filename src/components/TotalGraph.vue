@@ -299,7 +299,7 @@ const adjustLabelPosition = (index: number, totalLabels: number): number => {
         </div>
 
         <!-- 검사 그래프 영역 - 스크롤 가능하게 설정 -->
-        <div v-else class="overflow-auto max-h-[calc(100vh-300px)]">
+        <div v-else class="overflow-auto max-h-[calc(100%-20px)]">
             <div v-for="graph in filteredTests" :key="graph.id" class="p-4 mb-2">
                 <div class="flex items-center space-x-2 mb-2">
                     <span class="px-2 py-1 rounded text-xs font-bold" :style="{
