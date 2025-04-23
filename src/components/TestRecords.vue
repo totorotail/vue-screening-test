@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, watch } from 'vue';
+import { computed, ref, onMounted, watch, onBeforeUnmount } from 'vue';
 import TestService from '../services/TestService';
 
 const props = defineProps<{ patient: any }>();
@@ -10,13 +10,61 @@ const testCategories = ref<any[]>([]);
 const examRecordSummary = ref<any[]>([]);
 const loading = ref(false);
 
-const itemsPerPage = 9;
+// 동적으로 조정되는 페이지당 아이템 수
+const itemsPerPage = ref(9);
 const currentPage = ref(1);
-const totalPages = computed(() => Math.ceil(examRecordSummary.value.length / itemsPerPage));
+const totalPages = computed(() => Math.ceil(examRecordSummary.value.length / itemsPerPage.value));
 
 const paginatedExamRecords = computed(() => {
-    const start = (currentPage.value - 1) * itemsPerPage;
-    return examRecordSummary.value.slice(start, start + itemsPerPage);
+    const start = (currentPage.value - 1) * itemsPerPage.value;
+    return examRecordSummary.value.slice(start, start + itemsPerPage.value);
+});
+
+// 컨테이너와 아이템 높이 참조
+const containerRef = ref<HTMLElement | null>(null);
+const itemHeight = 65; // 대략적인 아이템 한 개의 높이 (px)
+
+// 화면 크기에 따라 동적으로 itemsPerPage 조정
+const updateItemsPerPage = () => {
+    if (!containerRef.value) return;
+
+    // 컨테이너 높이에서 페이지네이션 높이를 뺀 값
+    const availableHeight = containerRef.value.clientHeight - 44;
+
+    // 가능한 아이템 수 계산 (최소 3개)
+    const possibleItems = Math.max(3, Math.floor(availableHeight / itemHeight));
+
+    // 현재 아이템 수와 다를 경우에만 업데이트
+    if (possibleItems !== itemsPerPage.value) {
+        itemsPerPage.value = possibleItems;
+
+        // 현재 페이지 유효성 검사
+        if (currentPage.value > totalPages.value && totalPages.value > 0) {
+            currentPage.value = totalPages.value;
+        }
+    }
+};
+
+// 창 크기 변경 이벤트 리스너
+const handleResize = () => {
+    updateItemsPerPage();
+};
+
+onMounted(() => {
+    loadTestCategories();
+    if (props.patient?.id) loadTestHistorySummary();
+
+    // 초기 itemsPerPage 설정 및 리사이즈 이벤트 리스너 등록
+    window.addEventListener('resize', handleResize);
+    // DOM이 업데이트된 후 초기 계산
+    setTimeout(() => {
+        updateItemsPerPage();
+    }, 0);
+});
+
+onBeforeUnmount(() => {
+    // 컴포넌트 제거 시 이벤트 리스너 제거
+    window.removeEventListener('resize', handleResize);
 });
 
 const loadTestCategories = async () => {
@@ -43,6 +91,9 @@ const loadTestHistorySummary = async () => {
             displayedExams: record.testAcronyms.slice(0, 4),
             moreExams: record.testAcronyms.length > 4 ? `+${record.testAcronyms.length - 4}` : ''
         }));
+
+        // 데이터 로드 후 itemsPerPage 업데이트
+        updateItemsPerPage();
     } catch (error) {
         console.error('검사 기록 요약 로드 실패:', error);
         examRecordSummary.value = [];
@@ -54,11 +105,6 @@ const loadTestHistorySummary = async () => {
 watch(() => props.patient?.id, (newId) => {
     if (newId) loadTestHistorySummary();
 }, { immediate: true });
-
-onMounted(async () => {
-    await loadTestCategories();
-    if (props.patient?.id) await loadTestHistorySummary();
-});
 
 const goToPage = (page: number) => {
     if (page > 0 && page <= totalPages.value) currentPage.value = page;
@@ -95,7 +141,7 @@ const findTestCategory = (acronym: string) => {
         </div>
 
         <!-- 리스트 + 페이지네이션 -->
-        <div v-else class="flex flex-col flex-grow">
+        <div v-else class="flex flex-col flex-grow" ref="containerRef">
             <!-- 리스트 (고정 높이) -->
             <div class="h-[calc(100%-44px)] overflow-hidden">
                 <ul v-if="paginatedExamRecords.length > 0" class="divide-y divide-gray-200 h-full">
