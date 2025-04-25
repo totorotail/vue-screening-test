@@ -19,19 +19,7 @@ interface TestResultDto {
 const TestService = {
     // 특정 검사의 기본 정보를 조회
     getTestInfo(acronym: string) {
-        return apiClient.get(`/test/info/${acronym}`)
-            .then(response => {
-                // 안전한 JSON 처리 시도
-                try {
-                    if (typeof response.data.questionsConfig === 'string') {
-                        const parsed = JSON.parse(response.data.questionsConfig);
-                        response.data.parsedConfig = parsed; // 새 속성에 파싱된 객체 저장
-                    }
-                } catch (e) {
-                    console.warn(`JSON 파싱 경고: ${acronym}`, e);
-                }
-                return response;
-            });
+        return apiClient.get(`/test/info/${acronym}`);
     },
 
     // 모든 검사 목록을 조회
